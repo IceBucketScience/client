@@ -1,14 +1,27 @@
 {
   "js": "client/js",
   "dest": "client/build",
+  "fbSdkUrl": "http://connect.facebook.net/en_US/all.js",
+  "browser": {
+    "fb": "./client/build/fb-sdk.js"
+  },
+  "browserify-shim": {
+    "fb": {
+      "exports": "FB"
+    }
+  },
   "devDependencies": {
+    "browserify": "^9.0.3",
+    "browserify-shim": "^3.8.3",
     "grunt": "^0.4.5",
     "grunt-browserify": "^3.5.0",
     "grunt-contrib-watch": "^0.6.1",
     "reactify": "^1.1.0",
+    "request": "^2.53.0",
     "uglifyify": "^3.0.1"
   },
   "dependencies": {
+    "fluxxor": "^1.5.2",
     "react": "^0.13.1"
   }
 }
