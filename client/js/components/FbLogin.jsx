@@ -14,9 +14,17 @@ module.exports = React.createClass({
     },
     render: function() {
         if (this.isLoggedIn()) {
-            return <p>youre already logged in!</p>
+            return <div>
+                <h1>{this.props.session.userId}</h1>
+
+                <p>youre logged in!</p>
+            </div>;
         } else {
-            return <a href="#" onClick={this.login}>Login</a>;
+            return <div>
+                <h1>Please click the Login Button</h1>
+
+                <a href="#" onClick={this.login}>Login</a>
+            </div>;
         }
     }
 });

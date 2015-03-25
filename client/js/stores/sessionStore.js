@@ -8,14 +8,21 @@ module.exports = Fluxxor.createStore({
     initialize: function() {
         this.userId = null;
         this.accessToken = null;
+        this.loadingIceBucketMap = false;
 
         this.bindActions(
-            constants.FB_LOGIN_SUCCESS, this.onFbLoginSuccess
+            constants.FB_LOGIN_SUCCESS, this.onFbLoginSuccess,
+            constants.LOADING_ICE_BUCKET_MAP, this.onLoadingIceBucketMap
         );
     },
     onFbLoginSuccess: function(sessionInfo) {
         this.userId = sessionInfo.userId;
         this.accessToken = sessionInfo.accessToken;
+
+        this.emit("change");
+    },
+    onLoadingIceBucketMap: function() {
+        this.loadingIceBucketMap = true;
 
         this.emit("change");
     },

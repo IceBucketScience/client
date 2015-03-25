@@ -26,5 +26,13 @@ module.exports = {
                 });
             }
         });
+    },
+    handleAuthStateChange: function(response) {
+        if (response.status === "connected") {
+            this.dispatch(constants.FB_LOGIN_SUCCESS, {
+                userId: response.authResponse.userID,
+                accessToken: response.authResponse.accessToken
+            });
+        }
     }
 };
