@@ -1,5 +1,8 @@
-var Fluxxor = require("fluxxor");
 var React = require("react");
+var Fluxxor = require("fluxxor");
+var FluxMixin = Fluxxor.FluxMixin(React);
+var StoreWatchMixin = Fluxxor.StoreWatchMixin;
+
 var Fb = require("fb");
 
 Fb.init({
@@ -9,13 +12,39 @@ Fb.init({
     xfbml: true
 });
 
-var sessionStore = require("./stores/sessionStore");
+var SessionStore = require("./stores/SessionStore");
+
+var stores = {
+    SessionStore: new SessionStore()
+};
+
+var SessionActions = require("./actions/SessionActions");
+
+var actions = {
+    session: SessionActions
+};
+
+var FbLogin = require("./components/FbLogin.jsx");
 
 var App = React.createClass({
+    mixins: [FluxMixin, StoreWatchMixin("SessionStore")],
+    getStateFromFlux: function() {
+        var flux = this.getFlux();
+
+        return {
+            session: flux.store("SessionStore").getState()
+        };
+    },
+    
     render: function() {
-        console.log(this.props.test);
-        return <h1>{this.props.test}</h1>;
+        return <div>
+            <h1>{this.state.session.userId}</h1>
+
+            <FbLogin session={this.state.session}/>
+        </div>;
     }
 });
 
-React.render(<App test="Hello World" />, document.getElementById("app"));
+var flux = new Fluxxor.Flux(stores, actions);
+
+React.render(<App flux={flux} />, document.getElementById("app"));

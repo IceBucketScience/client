@@ -1,3 +1,5 @@
 module.exports = {
-    
+    FB_LOGIN: "FB_LOGIN",
+    FB_LOGIN_SUCCESS: "FB_LOGIN_SUCCESS",
+    FB_LOGIN_FAILURE: "FB_LOGIN_FAILURE"
 };
