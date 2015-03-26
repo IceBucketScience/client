@@ -21,8 +21,10 @@
     "uglifyify": "^3.0.1"
   },
   "dependencies": {
+    "bluebird": "^2.9.14",
     "fluxxor": "^1.5.2",
     "lodash": "^3.5.0",
-    "react": "^0.13.1"
+    "react": "^0.13.1",
+    "superagent": "^1.1.0"
   }
 }

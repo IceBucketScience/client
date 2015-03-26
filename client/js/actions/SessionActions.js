@@ -2,6 +2,9 @@ var constants = require("../constants");
 
 var Fb = require("fb");
 
+var Promise = require("bluebird");
+var request = require("superagent");
+
 module.exports = {
     login: function() {
         var self = this;

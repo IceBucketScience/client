@@ -5,49 +5,40 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/kelseyhightower/envconfig"
+	"github.com/gorilla/mux"
+
+	"client/app/config"
+	"client/app/index"
 )
-
-type Configuration struct {
-	ClientPath string `envconfig:"CLIENT_PATH"`
-
-	FbAppId     string `envconfig:"FB_APP_ID"`
-	FbAppSecret string `envconfig:"FB_APP_SECRET"`
-}
 
 type AppTemplateVars struct {
 	ClientPath string
 }
 
 func main() {
-	config := getConfigVars()
+	configVars := config.GetConfigVars()
 
-	http.HandleFunc("/", serveApp(config))
+	server := mux.NewRouter()
 
-	staticFileServer := http.StripPrefix("/static/", http.FileServer(http.Dir("client")))
-	http.Handle("/static/", staticFileServer)
+	serveClient("/", server, configVars)
 
-	log.Fatalln(http.ListenAndServe(":8080", nil))
+	index.InitIndexRequestHandler(server, configVars)
+
+	log.Fatal(http.ListenAndServe(":8080", server))
 }
 
-func getConfigVars() Configuration {
-	var config Configuration
-	err := envconfig.Process("", &config)
-	if err != nil {
-		log.Panicln(err)
-	}
-
-	//TODO: checks for missing env variables
-
-	return config
-}
-
-func serveApp(config Configuration) func(http.ResponseWriter, *http.Request) {
-	return func(rw http.ResponseWriter, req *http.Request) {
-		appTemplate := template.Must(template.ParseFiles(config.ClientPath + "/app.html"))
-		err := appTemplate.ExecuteTemplate(rw, "app", AppTemplateVars{ClientPath: config.ClientPath})
+/* Serves the front-end and requisite static files */
+func serveClient(clientUrl string, server *mux.Router, configVars *config.Configuration) {
+	server.HandleFunc(clientUrl, func(rw http.ResponseWriter, req *http.Request) {
+		appTemplate := template.Must(template.ParseFiles(configVars.ClientPath + "/app.html"))
+		err := appTemplate.ExecuteTemplate(rw, "app", AppTemplateVars{ClientPath: configVars.ClientPath})
 		if err != nil {
 			log.Panicln(err)
 		}
-	}
+	}).Methods("GET")
+
+	staticBaseUrl := clientUrl + "static/"
+
+	staticFileServer := http.StripPrefix(staticBaseUrl, http.FileServer(http.Dir("client")))
+	server.PathPrefix(staticBaseUrl).Handler(staticFileServer)
 }
