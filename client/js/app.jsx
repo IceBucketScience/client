@@ -29,7 +29,7 @@ var FbLogin = require("./components/FbLogin.jsx");
 var App = React.createClass({
     mixins: [FluxMixin, StoreWatchMixin("SessionStore")],
     componentDidMount: function() {
-        Fb.Event.subscribe("auth.authResponseChange", this.getFlux().actions.session.handleAuthStateChange);
+        //Fb.Event.subscribe("auth.authResponseChange", this.getFlux().actions.session.handleAuthStateChange);
     },
     getStateFromFlux: function() {
         var flux = this.getFlux();

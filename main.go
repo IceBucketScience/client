@@ -23,8 +23,7 @@ func main() {
 	serveClient("/", server, configVars)
 
 	index.InitIndexRequestHandler(server, configVars)
-
-	log.Fatal(http.ListenAndServe(":8080", server))
+	log.Fatal(http.ListenAndServe(":"+configVars.Port, server))
 }
 
 /* Serves the front-end and requisite static files */

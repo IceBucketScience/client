@@ -9,11 +9,13 @@ import (
 type Configuration struct {
 	ClientPath string `envconfig:"CLIENT_PATH"`
 	BaseUrl    string `envconfig:"BASE_URL"`
-	Port       uint16 `envconfig:"PORT"`
+	Port       string `envconfig:"PORT"`
 
 	FbAppId     string `envconfig:"FB_APP_ID"`
 	FbAppSecret string `envconfig:"FB_APP_SECRET"`
 }
+
+//TODO: Lift this into a shared package
 
 func GetConfigVars() *Configuration {
 	var config Configuration

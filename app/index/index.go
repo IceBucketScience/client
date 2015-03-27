@@ -8,20 +8,23 @@ import (
 	"github.com/gorilla/mux"
 
 	"client/app/config"
-	"client/app/msg_queue"
+	"shared/msg_queue"
 )
 
-var indexingJobQueue *msgQueue.Queue
+var indexingJobQueue *msgQueue.DispatcherQueue
+var indexingJobCompletionQueue *msgQueue.RecieverQueue
 
 func InitIndexRequestHandler(server *mux.Router, configVars *config.Configuration) {
-	indexingJobQueue = msgQueue.CreateQueue("indexing_job_queue", configVars.BaseUrl, server)
-
-	indexingJobQueue.RegisterCallback("TEST", func(payload map[string]interface{}) {
-		log.Println(payload)
-	})
+	indexingJobQueue = msgQueue.CreateDispatcherQueue("indexing_job_queue")
 
 	server.HandleFunc("/index", handleIndexRequests(configVars)).
 		Methods("POST")
+
+	indexingJobCompletionQueue = msgQueue.CreateRecieverQueue("indexing_job_completion_queue", configVars.BaseUrl, server)
+
+	indexingJobCompletionQueue.RegisterCallback("SUCCESS", func(payload map[string]interface{}) {
+		log.Println(payload)
+	})
 }
 
 type IndexRequestBody struct {
@@ -37,6 +40,6 @@ func handleIndexRequests(configVars *config.Configuration) func(http.ResponseWri
 			log.Panicln(err)
 		}
 
-		indexingJobQueue.PushMessage("TEST", indexRequest)
+		indexingJobQueue.PushMessage("INDEX_REQUEST", indexRequest)
 	}
 }
