@@ -7,8 +7,9 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"client/app/config"
+	"client/app/config_vars"
 	"client/app/index"
+	"shared/config"
 )
 
 type AppTemplateVars struct {
@@ -16,21 +17,22 @@ type AppTemplateVars struct {
 }
 
 func main() {
-	configVars := config.GetConfigVars()
+	var configuration configVars.Configuration
+	config.GetConfigVars(&configuration)
 
 	server := mux.NewRouter()
 
-	serveClient("/", server, configVars)
+	serveClient("/", server, &configuration)
 
-	index.InitIndexRequestHandler(server, configVars)
-	log.Fatal(http.ListenAndServe(":"+configVars.Port, server))
+	index.InitIndexRequestHandler(server, &configuration)
+	log.Fatal(http.ListenAndServe(":"+configuration.Port, server))
 }
 
 /* Serves the front-end and requisite static files */
-func serveClient(clientUrl string, server *mux.Router, configVars *config.Configuration) {
+func serveClient(clientUrl string, server *mux.Router, config *configVars.Configuration) {
 	server.HandleFunc(clientUrl, func(rw http.ResponseWriter, req *http.Request) {
-		appTemplate := template.Must(template.ParseFiles(configVars.ClientPath + "/app.html"))
-		err := appTemplate.ExecuteTemplate(rw, "app", AppTemplateVars{ClientPath: configVars.ClientPath})
+		appTemplate := template.Must(template.ParseFiles(config.ClientPath + "/app.html"))
+		err := appTemplate.ExecuteTemplate(rw, "app", AppTemplateVars{ClientPath: config.ClientPath})
 		if err != nil {
 			log.Panicln(err)
 		}
