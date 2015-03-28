@@ -21,17 +21,10 @@ function attemptFbLogin() {
     });
 }
 
-function checkIfIndexed(sessionInfo) {
-    return request.get("/people/" + sessionInfo.userId).endAsync()
-    .then(function(res) {
-        console.log(res);
-    });
-}
-
 function initIndexing(sessionInfo) {
     return request.post("/index").send(sessionInfo).endAsync()
     .then(function(res) {
-        console.log(res);
+        return res.alreadyIndexed;
     });
 }
 
@@ -49,22 +42,18 @@ module.exports = {
             };
 
             self.dispatch(constants.FB_LOGIN_SUCCESS, sessionInfo);
+            self.dispatch(constants.INDEXING_FB);
 
-            return [checkIfIndexed(sessionInfo), sessionInfo];
+            return initIndexing(sessionInfo);
         }, function() {
             self.dispatch(constants.FB_LOGIN_FAILURE);
         })
-        .spread(function(isIndexed, sessionInfo) {
-            if (isIndexed) {
-                return sessionInfo;
+        .then(function(alreadyIndexed) {
+            if (alreadyIndexed) {
+                self.dispatch(constants.ALREADY_INDEXED);
             } else {
-                self.dispatch(constants.INDEXING_FB)
-
-                return initIndexing(sessionInfo);
+                self.dispatch(constants.INDEXING_FB_SUCCESS);
             }
-        })
-        .then(function(sessionInfo) {
-
         });
     },
     handleAuthStateChange: function(response) {

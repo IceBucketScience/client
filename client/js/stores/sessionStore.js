@@ -8,11 +8,13 @@ module.exports = Fluxxor.createStore({
     initialize: function() {
         this.userId = null;
         this.accessToken = null;
-        this.loadingIceBucketMap = false;
+        this.indexingFb = false;
 
         this.bindActions(
             constants.FB_LOGIN_SUCCESS, this.onFbLoginSuccess,
-            constants.LOADING_ICE_BUCKET_MAP, this.onLoadingIceBucketMap
+            constants.INDEXING_FB, this.onIndexingFB,
+            constants.ALREADY_INDEXED, this.onIndexingFBSuccess,
+            constants.INDEXING_FB_SUCCESS, this.onIndexingFBSuccess
         );
     },
     onFbLoginSuccess: function(sessionInfo) {
@@ -21,15 +23,21 @@ module.exports = Fluxxor.createStore({
 
         this.emit("change");
     },
-    onLoadingIceBucketMap: function() {
-        this.loadingIceBucketMap = true;
+    onIndexingFB: function() {
+        this.indexingFb = true;
 
-        this.emit("change");
+        this.emit("change")
+    },
+    onIndexingFBSuccess: function() {
+        this.indexingFb = false;
+
+        this.emit("change")
     },
     getState: function() {
         return {
             userId: this.userId,
-            accessToken: this.accessToken
+            accessToken: this.accessToken,
+            indexingFb: this.indexingFb
         };
     }
 });

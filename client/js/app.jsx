@@ -24,7 +24,8 @@ var actions = {
     session: SessionActions
 };
 
-var FbLogin = require("./components/FbLogin.jsx");
+var FbLoginView = require("./components/FbLoginView.jsx");
+var LoggedInView = require("./components/LoggedInView.jsx");
 
 var App = React.createClass({
     mixins: [FluxMixin, StoreWatchMixin("SessionStore")],
@@ -38,10 +39,20 @@ var App = React.createClass({
             session: flux.store("SessionStore").getState()
         };
     },
-    
+    isLoggedIn: function() {
+        return this.state.session.userId !== null;
+    },
     render: function() {
+        var fbPanelContents
+
+        if (this.isLoggedIn()) {
+            fbPanelContents = <LoggedInView session={this.state.session}/>;
+        } else {
+            fbPanelContents = <FbLoginView />;
+        }
+
         return <div>
-            <FbLogin session={this.state.session}/>
+            {fbPanelContents}
         </div>;
     }
 });

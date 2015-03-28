@@ -8,17 +8,18 @@ import (
 	"github.com/gorilla/mux"
 
 	"client/app/config_vars"
+	"client/app/facebook"
 	"client/app/index"
 	"shared/config"
+	"shared/graph"
 )
-
-type AppTemplateVars struct {
-	ClientPath string
-}
 
 func main() {
 	var configuration configVars.Configuration
 	config.GetConfigVars(&configuration)
+
+	facebook.InitFbClient(configuration.FbAppId, configuration.FbAppSecret)
+	graph.InitGraph(configuration.DbUrl)
 
 	server := mux.NewRouter()
 
@@ -33,7 +34,9 @@ func main() {
 func InitClientServer(clientUrl string, server *mux.Router, config *configVars.Configuration) {
 	server.HandleFunc(clientUrl, func(rw http.ResponseWriter, req *http.Request) {
 		appTemplate := template.Must(template.ParseFiles(config.ClientPath + "/app.html"))
-		err := appTemplate.ExecuteTemplate(rw, "app", AppTemplateVars{ClientPath: config.ClientPath})
+		err := appTemplate.ExecuteTemplate(rw, "app", struct {
+			ClientPath string
+		}{ClientPath: config.ClientPath})
 		if err != nil {
 			log.Panicln(err)
 		}

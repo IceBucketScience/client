@@ -9,6 +9,8 @@ import (
 	"github.com/gorilla/mux"
 
 	"client/app/config_vars"
+	"client/app/facebook"
+	"shared/graph"
 	"shared/msg_queue"
 )
 
@@ -27,7 +29,11 @@ type IndexRequestBody struct {
 	AccessToken string `json:"accessToken"`
 }
 
-type IndexRequest struct {
+type AlreadyIndexedResponse struct {
+	AlreadyIndexed bool `json:"alreadyIndexed"`
+}
+
+type IndexRequestMessage struct {
 	UserId string `json:"userId"`
 }
 
@@ -36,15 +42,44 @@ func handleIndexRequest(config *configVars.Configuration) func(http.ResponseWrit
 		var indexRequest IndexRequestBody
 		parseErr := json.NewDecoder(req.Body).Decode(&indexRequest)
 		if parseErr != nil {
+			rw.WriteHeader(400)
 			log.Panicln(parseErr)
+			return
 		}
 
-		indexingJobQueue.PushMessage("INDEX_REQUEST", IndexRequest{UserId: indexRequest.UserId})
+		//Checks to see if a volunteer with this userId already exists. If so,
+		//the user has already been indexed. If not, the user still needs to be indexed.
+		volunteer, volunteerSearchErr := graph.FindVolunteer(indexRequest.UserId)
+		if volunteerSearchErr != nil {
+			rw.WriteHeader(400)
+			log.Panicln(volunteerSearchErr)
+			return
+		} else if volunteer != nil {
+			json.NewEncoder(rw).Encode(AlreadyIndexedResponse{AlreadyIndexed: true})
+			return
+		}
+
+		longTermToken, _, exchangeErr := facebook.GetLongTermToken(indexRequest.AccessToken)
+		if exchangeErr != nil {
+			rw.WriteHeader(400)
+			log.Panicln(exchangeErr)
+			return
+		}
+
+		_, volunteerCreationErr := graph.CreateVolunteer(indexRequest.UserId, longTermToken)
+		if volunteerCreationErr != nil {
+			rw.WriteHeader(400)
+			log.Panicln(volunteerCreationErr)
+			return
+		}
+
+		indexingJobQueue.PushMessage("INDEX_REQUEST", IndexRequestMessage{UserId: indexRequest.UserId})
 
 		indexingErr := waitForIndexingCompletion(indexRequest.UserId)
 		if indexingErr != nil {
-			log.Panicln(indexingErr)
 			rw.WriteHeader(400)
+			log.Panicln(indexingErr)
+			return
 		}
 
 		rw.WriteHeader(200)
