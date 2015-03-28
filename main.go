@@ -22,14 +22,15 @@ func main() {
 
 	server := mux.NewRouter()
 
-	serveClient("/", server, &configuration)
+	InitClientServer("/", server, &configuration)
 
 	index.InitIndexRequestHandler(server, &configuration)
+
 	log.Fatal(http.ListenAndServe(":"+configuration.Port, server))
 }
 
 /* Serves the front-end and requisite static files */
-func serveClient(clientUrl string, server *mux.Router, config *configVars.Configuration) {
+func InitClientServer(clientUrl string, server *mux.Router, config *configVars.Configuration) {
 	server.HandleFunc(clientUrl, func(rw http.ResponseWriter, req *http.Request) {
 		appTemplate := template.Must(template.ParseFiles(config.ClientPath + "/app.html"))
 		err := appTemplate.ExecuteTemplate(rw, "app", AppTemplateVars{ClientPath: config.ClientPath})
