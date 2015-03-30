@@ -9,6 +9,7 @@ module.exports = Fluxxor.createStore({
         this.userId = null;
         this.accessToken = null;
         this.indexingFb = false;
+        this.indexedSuccessfully = false;
 
         this.bindActions(
             constants.FB_LOGIN_SUCCESS, this.onFbLoginSuccess,
@@ -30,6 +31,7 @@ module.exports = Fluxxor.createStore({
     },
     onIndexingFBSuccess: function() {
         this.indexingFb = false;
+        this.indexedSuccessfully = true;
 
         this.emit("change")
     },
@@ -37,7 +39,8 @@ module.exports = Fluxxor.createStore({
         return {
             userId: this.userId,
             accessToken: this.accessToken,
-            indexingFb: this.indexingFb
+            indexingFb: this.indexingFb,
+            indexedSuccessfully: this.indexedSuccessfully
         };
     }
 });

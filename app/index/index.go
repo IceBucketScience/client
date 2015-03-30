@@ -17,14 +17,25 @@ import (
 var indexingJobQueue *msgQueue.DispatcherQueue
 var indexingJobCompletionQueue *msgQueue.RecieverQueue
 
-func InitIndexRequestHandler(server *mux.Router, config *configVars.Configuration) {
-	indexingJobQueue = msgQueue.CreateDispatcherQueue("indexing_job_queue")
-	indexingJobCompletionQueue = msgQueue.CreateRecieverQueue("indexing_job_completion_queue", config.BaseUrl, server)
+func InitIndexRequestHandler(server *mux.Router, config *configVars.Configuration) error {
+	indexingJobQueueObj, indexingJobQueueCreationErr := msgQueue.CreateDispatcherQueue("indexing_job_queue")
+	indexingJobCompletionQueueObj, indexingJobCompletionQueueCreationErr := msgQueue.CreateRecieverQueue("indexing_job_completion_queue", config.BaseUrl, server)
+
+	if indexingJobQueueCreationErr != nil {
+		return indexingJobQueueCreationErr
+	} else if indexingJobCompletionQueueCreationErr != nil {
+		return indexingJobCompletionQueueCreationErr
+	}
+
+	indexingJobQueue = indexingJobQueueObj
+	indexingJobCompletionQueue = indexingJobCompletionQueueObj
 
 	server.HandleFunc("/index", handleIndexRequest(config)).Methods("POST")
+
+	return nil
 }
 
-type IndexRequestBody struct {
+type IndexRequest struct {
 	UserId      string `json:"userId"`
 	AccessToken string `json:"accessToken"`
 }
@@ -33,13 +44,9 @@ type AlreadyIndexedResponse struct {
 	AlreadyIndexed bool `json:"alreadyIndexed"`
 }
 
-type IndexRequestMessage struct {
-	UserId string `json:"userId"`
-}
-
 func handleIndexRequest(config *configVars.Configuration) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		var indexRequest IndexRequestBody
+		var indexRequest IndexRequest
 		parseErr := json.NewDecoder(req.Body).Decode(&indexRequest)
 		if parseErr != nil {
 			rw.WriteHeader(400)
@@ -66,14 +73,7 @@ func handleIndexRequest(config *configVars.Configuration) func(http.ResponseWrit
 			return
 		}
 
-		_, volunteerCreationErr := graph.CreateVolunteer(indexRequest.UserId, longTermToken)
-		if volunteerCreationErr != nil {
-			rw.WriteHeader(400)
-			log.Panicln(volunteerCreationErr)
-			return
-		}
-
-		indexingJobQueue.PushMessage("INDEX_REQUEST", IndexRequestMessage{UserId: indexRequest.UserId})
+		indexingJobQueue.PushMessage("INDEX_REQUEST", IndexRequest{UserId: indexRequest.UserId, AccessToken: longTermToken})
 
 		indexingErr := waitForIndexingCompletion(indexRequest.UserId)
 		if indexingErr != nil {

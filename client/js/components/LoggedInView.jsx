@@ -4,17 +4,18 @@ var FluxMixin = Fluxxor.FluxMixin(React);
 
 module.exports = React.createClass({
     mixins: [FluxMixin],
-    isIndexing: function() {
-        return this.props.session.indexingFb;
-    },
     render: function() {
-        if (this.isIndexing()) {
+        if (this.props.session.indexingFb) {
             return <div>
                 <p>indexing...</p>
             </div>;
-        } else {
+        } else if (this.props.session.indexedSuccessfully) {
             return <div>
                 <p>thank you for indexing!</p>
+            </div>;
+        } else {
+            return <div>
+                <p>whoops! There was an error while indexing.</p>
             </div>;
         }
     }
