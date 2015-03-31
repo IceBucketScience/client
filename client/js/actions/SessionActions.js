@@ -54,6 +54,8 @@ module.exports = {
             } else {
                 self.dispatch(constants.INDEXING_FB_SUCCESS);
             }
+        }, function() {
+            self.dispatch(constants.INDEXING_FB_FAILURE);
         });
     },
     handleAuthStateChange: function(response) {

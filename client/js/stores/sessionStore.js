@@ -15,7 +15,8 @@ module.exports = Fluxxor.createStore({
             constants.FB_LOGIN_SUCCESS, this.onFbLoginSuccess,
             constants.INDEXING_FB, this.onIndexingFB,
             constants.ALREADY_INDEXED, this.onIndexingFBSuccess,
-            constants.INDEXING_FB_SUCCESS, this.onIndexingFBSuccess
+            constants.INDEXING_FB_SUCCESS, this.onIndexingFBSuccess,
+            constants.INDEXING_FB_FAILURE, this.onIndexingFBFailure
         );
     },
     onFbLoginSuccess: function(sessionInfo) {
@@ -32,6 +33,12 @@ module.exports = Fluxxor.createStore({
     onIndexingFBSuccess: function() {
         this.indexingFb = false;
         this.indexedSuccessfully = true;
+
+        this.emit("change")
+    },
+    onIndexingFBFailure: function() {
+        this.indexingFb = false;
+        this.indexedSuccessfully = false;
 
         this.emit("change")
     },
