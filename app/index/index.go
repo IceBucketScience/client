@@ -55,7 +55,7 @@ func handleIndexRequest(rw http.ResponseWriter, req *http.Request) {
 
 	//Checks to see if a volunteer with this userId already exists. If so,
 	//the user has already been indexed. If not, the user still needs to be indexed.
-	volunteer, volunteerSearchErr := graph.FindVolunteer(indexRequest.UserId)
+	volunteer, volunteerSearchErr := graph.FindIndexedVolunteer(indexRequest.UserId)
 	if volunteerSearchErr != nil {
 		rw.WriteHeader(400)
 		log.Panicln(volunteerSearchErr)
