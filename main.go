@@ -8,9 +8,9 @@ import (
 	"github.com/gorilla/mux"
 
 	"client/app/config_vars"
-	"client/app/facebook"
 	"client/app/index"
 	"shared/config"
+	"shared/facebook"
 	"shared/graph"
 )
 
@@ -27,7 +27,7 @@ func main() {
 
 	index.InitIndexRequestHandler(server, &configuration)
 
-	log.Fatal(http.ListenAndServe(":"+configuration.Port, server))
+	log.Fatalln(http.ListenAndServe(":"+configuration.Port, server))
 }
 
 /* Serves the front-end and requisite static files */

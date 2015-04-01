@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"client/app/config_vars"
-	"client/app/facebook"
+	"shared/facebook"
 	"shared/graph"
 	"shared/msg_queue"
 )
@@ -72,7 +72,12 @@ func handleIndexRequest(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	indexingJobQueue.PushMessage("INDEX_REQUEST", IndexRequest{UserId: indexRequest.UserId, AccessToken: longTermToken})
+	pushErr := indexingJobQueue.PushMessage("INDEX_REQUEST", IndexRequest{UserId: indexRequest.UserId, AccessToken: longTermToken})
+	if pushErr != nil {
+		rw.WriteHeader(400)
+		log.Panicln(pushErr)
+		return
+	}
 
 	indexingErr := waitForIndexingCompletion(indexRequest.UserId)
 	if indexingErr != nil {
