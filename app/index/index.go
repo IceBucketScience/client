@@ -93,35 +93,25 @@ func waitForIndexingCompletion(userId string) error {
 	indexingComplete := make(chan bool)
 	var indexingErr error
 
-	successCallbackId := indexingJobCompletionQueue.RegisterCallback("SUCCESS", func(userId string, indexingComplete chan bool) func(map[string]interface{}) {
-		//the callback function is returned from a closure to pass the userId and the channel to notify completion of indexing
-		return func(payload map[string]interface{}) {
-			if payload["userId"] == userId {
-				indexingComplete <- true
+	successCallbackId := indexingJobCompletionQueue.RegisterCallback("SUCCESS", func(payload map[string]interface{}) {
+		if payload["userId"] == userId {
+			indexingComplete <- true
 
-			}
 		}
-	}(userId, indexingComplete))
+	})
 
-	failureCallbackId := indexingJobCompletionQueue.RegisterCallback("FAILURE", func(userId string, indexingComplete chan bool, indexingErr *error) func(map[string]interface{}) {
-		//the callback function is returned from a closure to pass the userId and the channel to notify completion of indexing
-		return func(payload map[string]interface{}) {
-			if payload["userId"] == userId {
-				*indexingErr = errors.New(payload["message"].(string))
-				indexingComplete <- true
-			}
+	failureCallbackId := indexingJobCompletionQueue.RegisterCallback("FAILURE", func(payload map[string]interface{}) {
+		if payload["userId"] == userId {
+			indexingErr = errors.New(payload["message"].(string))
+			indexingComplete <- true
 		}
-	}(userId, indexingComplete, &indexingErr))
+	})
 
 	//blocks until indexingComplete recieves true from the callback function
 	<-indexingComplete
 
-	if indexingErr != nil {
-		return indexingErr
-	}
-
 	indexingJobCompletionQueue.UnregisterCallback(successCallbackId)
 	indexingJobCompletionQueue.UnregisterCallback(failureCallbackId)
 
-	return nil
+	return indexingErr
 }
