@@ -56,6 +56,7 @@ func handleIndexRequest(rw http.ResponseWriter, req *http.Request) {
 	//Checks to see if a volunteer with this userId already exists. If so,
 	//the user has already been indexed. If not, the user still needs to be indexed.
 	volunteer, volunteerSearchErr := graph.FindVolunteer(indexRequest.UserId)
+
 	if volunteerSearchErr != nil {
 		rw.WriteHeader(400)
 		log.Panicln(volunteerSearchErr)
@@ -65,7 +66,7 @@ func handleIndexRequest(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if !volunteer.IsIndexed {
+	if volunteer == nil {
 
 		longTermToken, _, exchangeErr := facebook.GetLongTermToken(indexRequest.AccessToken)
 		if exchangeErr != nil {
