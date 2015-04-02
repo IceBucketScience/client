@@ -55,28 +55,31 @@ func handleIndexRequest(rw http.ResponseWriter, req *http.Request) {
 
 	//Checks to see if a volunteer with this userId already exists. If so,
 	//the user has already been indexed. If not, the user still needs to be indexed.
-	volunteer, volunteerSearchErr := graph.FindIndexedVolunteer(indexRequest.UserId)
+	volunteer, volunteerSearchErr := graph.FindVolunteer(indexRequest.UserId)
 	if volunteerSearchErr != nil {
 		rw.WriteHeader(400)
 		log.Panicln(volunteerSearchErr)
 		return
-	} else if volunteer != nil {
+	} else if volunteer != nil && volunteer.IsIndexed {
 		json.NewEncoder(rw).Encode(AlreadyIndexedResponse{AlreadyIndexed: true})
 		return
 	}
 
-	longTermToken, _, exchangeErr := facebook.GetLongTermToken(indexRequest.AccessToken)
-	if exchangeErr != nil {
-		rw.WriteHeader(400)
-		log.Panicln(exchangeErr)
-		return
-	}
+	if !volunteer.IsIndexed {
 
-	pushErr := indexingJobQueue.PushMessage("INDEX_REQUEST", IndexRequest{UserId: indexRequest.UserId, AccessToken: longTermToken})
-	if pushErr != nil {
-		rw.WriteHeader(400)
-		log.Panicln(pushErr)
-		return
+		longTermToken, _, exchangeErr := facebook.GetLongTermToken(indexRequest.AccessToken)
+		if exchangeErr != nil {
+			rw.WriteHeader(400)
+			log.Panicln(exchangeErr)
+			return
+		}
+
+		pushErr := indexingJobQueue.PushMessage("INDEX_REQUEST", IndexRequest{UserId: indexRequest.UserId, AccessToken: longTermToken})
+		if pushErr != nil {
+			rw.WriteHeader(400)
+			log.Panicln(pushErr)
+			return
+		}
 	}
 
 	indexingErr := waitForIndexingCompletion(indexRequest.UserId)
