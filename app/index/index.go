@@ -81,6 +81,8 @@ func handleIndexRequest(rw http.ResponseWriter, req *http.Request) {
 			log.Panicln(pushErr)
 			return
 		}
+
+		log.Println("[SENT INDEX_REQUEST]", indexRequest.UserId)
 	}
 
 	indexingErr := waitForIndexingCompletion(indexRequest.UserId)
@@ -89,6 +91,8 @@ func handleIndexRequest(rw http.ResponseWriter, req *http.Request) {
 		log.Panicln(indexingErr)
 		return
 	}
+
+	log.Println("[INDEX_REQUEST_SUCCESSFUL]", indexRequest.UserId)
 
 	rw.WriteHeader(200)
 }
