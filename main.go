@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"client/app/config_vars"
+	graphServer "client/app/graph"
 	"client/app/index"
 	"shared/config"
 	"shared/facebook"
@@ -26,6 +27,8 @@ func main() {
 	InitClientServer("/", server, &configuration)
 
 	index.InitIndexRequestHandler(server, &configuration)
+
+	graphServer.InitGraphRetrievalHandler(server)
 
 	log.Fatalln(http.ListenAndServe(":"+configuration.Port, server))
 }

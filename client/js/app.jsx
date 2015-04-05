@@ -5,13 +5,13 @@ var StoreWatchMixin = Fluxxor.StoreWatchMixin;
 
 var Fb = require("fb");
 
-Fb.init({
+/*Fb.init({
     appId: "155173904571953",
     version: "v1.0",
     status: true,
     cookie: true,
     xfbml: true
-});
+});*/
 
 var SessionStore = require("./stores/SessionStore");
 

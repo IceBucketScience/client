@@ -6,10 +6,15 @@ var Fb = require("fb");
 
 module.exports = Fluxxor.createStore({
     initialize: function() {
-        this.userId = null;
+        /*this.userId = null;
         this.accessToken = null;
         this.indexingFb = false;
-        this.indexedSuccessfully = false;
+        this.indexedSuccessfully = false;*/
+
+        this.userId = "100002440675767";
+        this.accessToken = "CAACNIT113jEBAFYcOY1HQ2ncXAdKIFzjvI2pDAlD3pOr0xefIhtQFNZAjD465W2GzZC0ZC1HH1V44otbZAZAj7xZAREaMf1WsgaHbtq7QYJBErmec9VwYUxOqpxePGUHR73ccC4aQnSHUMXZB0FaGc68ZAIBRPOYldCpFioWUd5Ujv1VZCQ2yetZCN";
+        this.indexingFb = false;
+        this.indexedSuccessfully = true;
 
         this.bindActions(
             constants.FB_LOGIN_SUCCESS, this.onFbLoginSuccess,

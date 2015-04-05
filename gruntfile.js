@@ -51,6 +51,6 @@ module.exports = function(grunt) {
         });
     });
 
-    grunt.registerTask("package:dev", ["downloadFbSDK", "browserify:dev"]);
-    grunt.registerTask("package:dist", ["downloadFbSDK", "browserify:dist"]);
+    grunt.registerTask("package:dev", [/*"downloadFbSDK",*/ "browserify:dev"]);
+    grunt.registerTask("package:dist", [/*"downloadFbSDK",*/ "browserify:dist"]);
 };

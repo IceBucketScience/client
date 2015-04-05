@@ -49,7 +49,7 @@ func handleIndexRequest(rw http.ResponseWriter, req *http.Request) {
 	parseErr := json.NewDecoder(req.Body).Decode(&indexRequest)
 	if parseErr != nil {
 		rw.WriteHeader(400)
-		log.Panicln(parseErr)
+		log.Println(parseErr)
 		return
 	}
 
@@ -59,7 +59,7 @@ func handleIndexRequest(rw http.ResponseWriter, req *http.Request) {
 
 	if volunteerSearchErr != nil {
 		rw.WriteHeader(400)
-		log.Panicln(volunteerSearchErr)
+		log.Println(volunteerSearchErr)
 		return
 	} else if volunteer != nil && volunteer.IsIndexed {
 		json.NewEncoder(rw).Encode(AlreadyIndexedResponse{AlreadyIndexed: true})
@@ -71,14 +71,14 @@ func handleIndexRequest(rw http.ResponseWriter, req *http.Request) {
 		longTermToken, _, exchangeErr := facebook.GetLongTermToken(indexRequest.AccessToken)
 		if exchangeErr != nil {
 			rw.WriteHeader(400)
-			log.Panicln(exchangeErr)
+			log.Println(exchangeErr)
 			return
 		}
 
 		pushErr := indexingJobQueue.PushMessage("INDEX_REQUEST", IndexRequest{UserId: indexRequest.UserId, AccessToken: longTermToken})
 		if pushErr != nil {
 			rw.WriteHeader(400)
-			log.Panicln(pushErr)
+			log.Println(pushErr)
 			return
 		}
 
@@ -88,7 +88,7 @@ func handleIndexRequest(rw http.ResponseWriter, req *http.Request) {
 	indexingErr := waitForIndexingCompletion(indexRequest.UserId)
 	if indexingErr != nil {
 		rw.WriteHeader(400)
-		log.Panicln(indexingErr)
+		log.Println(indexingErr)
 		return
 	}
 

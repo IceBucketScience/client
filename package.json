@@ -24,7 +24,9 @@
     "bluebird": "^2.9.14",
     "fluxxor": "^1.5.2",
     "lodash": "^3.5.0",
+    "radium": "^0.10.1",
     "react": "^0.13.1",
+    "sigma": "^1.0.3",
     "superagent": "^1.1.0"
   }
 }
