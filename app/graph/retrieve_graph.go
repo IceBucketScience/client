@@ -22,6 +22,7 @@ func InitGraphRetrievalHandler(server *mux.Router) {
 			return
 		}
 
+		rw.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(rw).Encode(graph)
 	}).Methods("GET")
 }

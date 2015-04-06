@@ -14,9 +14,11 @@ var Fb = require("fb");
 });*/
 
 var SessionStore = require("./stores/SessionStore");
+var GraphStore = require("./stores/GraphStore");
 
 var stores = {
-    SessionStore: new SessionStore()
+    SessionStore: new SessionStore(),
+    GraphStore: new GraphStore()
 };
 
 var SessionActions = require("./actions/SessionActions");
@@ -27,9 +29,10 @@ var actions = {
 
 var FbLoginView = require("./components/FbLoginView.jsx");
 var LoggedInView = require("./components/LoggedInView.jsx");
+var Graph = require("./components/Graph.jsx");
 
 var App = React.createClass({
-    mixins: [FluxMixin, StoreWatchMixin("SessionStore")],
+    mixins: [FluxMixin, StoreWatchMixin("SessionStore", "GraphStore")],
     componentDidMount: function() {
         //Fb.Event.subscribe("auth.authResponseChange", this.getFlux().actions.session.handleAuthStateChange);
     },
@@ -37,7 +40,8 @@ var App = React.createClass({
         var flux = this.getFlux();
 
         return {
-            session: flux.store("SessionStore").getState()
+            session: flux.store("SessionStore").getState(),
+            graph: flux.store("GraphStore").getState()
         };
     },
     isLoggedIn: function() {
@@ -51,9 +55,11 @@ var App = React.createClass({
         } else {
             fbPanelContents = <FbLoginView />;
         }
-
+        
         return <div>
             {fbPanelContents}
+
+            <Graph graph={this.state.graph} />
         </div>;
     }
 });
