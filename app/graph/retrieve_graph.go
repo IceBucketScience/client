@@ -88,6 +88,7 @@ func getFriendshipsFromGraphOf(volunteerId string) ([]*Friendship, error) {
 	}
 
 	for _, friendshipData := range rawFriendships {
+		log.Println(friendshipData)
 		friendship := &Friendship{Id: strconv.Itoa(friendshipData.GetRelationshipId()), Source: friendshipData.SourceId, Target: friendshipData.TargetId}
 		friendships = append(friendships, friendship)
 	}
