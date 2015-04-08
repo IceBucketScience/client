@@ -2,8 +2,6 @@ var Fluxxor = require("fluxxor");
 
 var constants = require("../constants");
 
-var Fb = require("fb");
-
 module.exports = Fluxxor.createStore({
     initialize: function() {
         this.userId = null;
