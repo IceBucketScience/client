@@ -14,22 +14,26 @@ Fb.init({
 });
 
 var SessionStore = require("./stores/SessionStore");
+var GraphPlayerStore = require("./stores/GraphPlayerStore");
 var GraphStore = require("./stores/GraphStore");
 
 var stores = {
     SessionStore: new SessionStore(),
+    GraphPlayerStore: new GraphPlayerStore(),
     GraphStore: new GraphStore()
 };
 
 var SessionActions = require("./actions/SessionActions");
+var GraphPlayerActions = require("./actions/GraphPlayerActions");
 
 var actions = {
-    session: SessionActions
+    session: SessionActions,
+    graphPlayer: GraphPlayerActions
 };
 
 var FbLoginView = require("./components/FbLoginView.jsx");
 var LoggedInView = require("./components/LoggedInView.jsx");
-var Graph = require("./components/Graph.jsx");
+var GraphPlayer = require("./components/GraphPlayer.jsx");
 
 var App = React.createClass({
     mixins: [FluxMixin, StoreWatchMixin("SessionStore", "GraphStore")],
@@ -40,8 +44,7 @@ var App = React.createClass({
         var flux = this.getFlux();
 
         return {
-            session: flux.store("SessionStore").getState(),
-            graph: flux.store("GraphStore").getState()
+            session: flux.store("SessionStore").getState()
         };
     },
     isLoggedIn: function() {
@@ -56,11 +59,17 @@ var App = React.createClass({
             fbPanelContents = <FbLoginView />;
         }
 
-        return <div>
-            {fbPanelContents}
+        if (this.state.session.graphLoadedSuccessfully) {
+            return <div>
+                {fbPanelContents}
 
-            <Graph graph={this.state.graph} />
-        </div>;
+                <GraphPlayer />
+            </div>;
+        } else {
+            return <div>
+                {fbPanelContents}
+            </div>;
+        }
     }
 });
 

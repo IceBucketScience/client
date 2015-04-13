@@ -21,8 +21,11 @@ module.exports = React.createClass({
             sigmaGraph: new Sigma({
                 container: document.getElementById("graph-container"),
                 settings: {
-                    drawLabels: false,
+                    labelThreshold: 9001,
+                    singleHover: true,
                     drawEdgeLabels: false,
+                    minEdgeSize: 0.01,
+                    defaultNodeColor: "#000",
                     defaultEdgeColor: "#aaa",
                     edgeColor: "default"
                 }
@@ -33,44 +36,55 @@ module.exports = React.createClass({
         //TODO: cleanup sigma instance
     },
     initialRenderGraph: function(graph) {
-        this.props.graph.nodes.forEach(function(node) {
-            node.x = Math.random();
-            node.y = Math.random();
-            node.size = 1;
-            node.color = "#000";
-        });
-
         graph.graph.read({
-            nodes: this.props.graph.nodes,
+            nodes: this.props.graph.nodes.map(function(node, index) {
+                node.label = node.name;
+
+                node.x = Math.random();
+                node.y = Math.random();
+                node.size = 1;
+
+                if (index === 0) {
+                    node.size = 2;
+                    node.color = "#e00";
+                }
+
+                return node;
+            }),
             edges: this.props.graph.edges
         });
         
         graph.startForceAtlas2({
-            startingIterations: 100000000,
-            iterationsPerRender: 100
+            /*startingIterations: 1,
+            iterationsPerRender: 1*/
         });
-
-        graph.refresh();
 
         setTimeout(function() {
             graph.killForceAtlas2();
             this.setState({initialRenderComplete: true});
-
-            setInterval(function() {
-                var nodeId = getRandomInt(0, graph.graph.nodes().length);
-
-                graph.graph.nodes()[nodeId].color = "#f00";
-
-                graph.refresh();
-            }, 1000);
         }.bind(this), 5000);
     },
     componentDidUpdate: function(prevProps, prevState) {
-        if (!this.state.initialRenderComplete &&
-            this.props.graph.nodes.length > 0 &&
-            this.props.graph.nodes.length > 0) {
-            this.initialRenderGraph(this.state.sigmaGraph);
+        var self = this;
+        var graph = self.state.sigmaGraph;
+
+        if (!self.state.initialRenderComplete &&
+            self.props.graph.nodes.length > 0 &&
+            self.props.graph.nodes.length > 0) {
+            self.initialRenderGraph(graph);
         }
+        
+        if (self.state.initialRenderComplete) {
+            self.props.graph.currNominated.forEach(function(id) {
+                graph.graph.nodes(id).color = "#a00";
+            });
+
+            self.props.graph.currCompleted.forEach(function(id) {
+                graph.graph.nodes(id).color = "#00a";
+            });
+        }
+
+        this.state.sigmaGraph.refresh();
     },
     render: function() {
         var graphContainerStyle = {
@@ -81,8 +95,6 @@ module.exports = React.createClass({
             borderColor: "#000"
         };
 
-        return <div>
-            <div id="graph-container" style={graphContainerStyle}></div>
-        </div>;
+        return <div id="graph-container" style={graphContainerStyle}></div>;
     }
 });

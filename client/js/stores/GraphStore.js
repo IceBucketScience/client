@@ -4,23 +4,62 @@ var constants = require("../constants");
 
 module.exports = Fluxxor.createStore({
     initialize: function() {
+        this.nodesMap = {};
         this.nodes = [];
         this.edges = [];
+        this.participants = [];
+        this.nominations = [];
+
+        this.currNominated = [];
+        this.currCompleted = [];
 
         this.bindActions(
-            constants.LOADING_ICE_BUCKET_MAP_SUCCESS, this.onLoadingIceBucketMapSuccess
+            constants.LOADING_ICE_BUCKET_MAP_SUCCESS, this.onLoadingIceBucketMapSuccess,
+            constants.UPDATE_GRAPH, this.onUpdateGraph
         );
     },
     onLoadingIceBucketMapSuccess: function(graph) {
-        this.nodes = graph.nodes;
-        this.edges = graph.edges;
+        var self = this;
 
-        this.emit("change");
+        graph.nodes.forEach(function(node) {
+            self.nodesMap[node.id] = node;
+        });
+
+        self.nodes = graph.nodes;
+        self.edges = graph.edges;
+        self.participants = graph.participants;
+        self.nominations = graph.nominations;
+
+        self.emit("change");
+    },
+    onUpdateGraph: function(payload) {
+        var self = this;
+
+        var currentPlayTime = payload.currentPlayTime;
+
+        self.currNominated = [];
+        self.currCompleted = [];
+
+        self.participants.forEach(function(nodeId) {
+            var node = self.nodesMap[nodeId];
+            
+            if (node.timeCompleted !== 0 && node.timeCompleted <= currentPlayTime) {
+                self.currCompleted.push(node.id);
+            } else if (node.timeNominated <= currentPlayTime) {
+                self.currNominated.push(node.id);
+            }
+        });
+
+        self.emit("change");
     },
     getState: function() {
         return {
             nodes: this.nodes,
-            edges: this.edges
+            edges: this.edges,
+            participants: this.participants,
+            nominations: this.nominations,
+            currNominated: this.currNominated,
+            currCompleted: this.currCompleted
         };
     }
 });
