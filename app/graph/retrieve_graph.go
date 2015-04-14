@@ -60,7 +60,7 @@ func retrieveGraph(volunteerId string) (*Graph, error) {
 		return nil, getFriendshipsErr
 	}
 
-	nominations, getNominationsErr := getNominationIds(friendships)
+	nominations, getNominationsErr := graph.GetFriendshipIdsWithNominations(volunteerId)
 	if getNominationsErr != nil {
 		return nil, getNominationsErr
 	}
@@ -96,7 +96,6 @@ func getPeopleFromGraphOf(volunteerId string) ([]*Person, error) {
 	return people, nil
 }
 
-//TODO: note friendships w/ nominations
 func getFriendshipsFromGraphOf(volunteerId string) ([]*Friendship, error) {
 	friendships := []*Friendship{}
 
@@ -123,39 +122,4 @@ func getParticipantIds(people []*Person) []string {
 	}
 
 	return ids
-}
-
-func getNominationIds(friendships []*Friendship) ([]string, error) {
-	ids := []string{}
-	//TODO: write Cypher query that gets ids of nominations quickly
-	/*checkedFriendships := []*Friendship{}
-	checkedFriendshipsCh := make(chan *Friendship)
-	errCh := make(chan error)
-
-	for _, friendship := range friendships {
-		go func(friendship *Friendship) {
-			nominationExists, nominationExistsErr := graph.NominationExists(friendship.Source, friendship.Target)
-			if nominationExistsErr != nil {
-				errCh <- nominationExistsErr
-			} else if nominationExists {
-				ids = append(ids, friendship.Id)
-				checkedFriendshipsCh <- friendship
-			}
-		}(friendship)
-	}
-
-	for len(friendships) > 0 {
-		select {
-		case checkedFriendship := <-checkedFriendshipsCh:
-			checkedFriendships = append(checkedFriendships, checkedFriendship)
-		case err := <-errCh:
-			return nil, err
-		}
-
-		if len(checkedFriendships) == len(friendships) {
-			break
-		}
-	}*/
-
-	return ids, nil
 }

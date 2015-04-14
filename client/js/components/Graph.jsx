@@ -4,10 +4,6 @@ var FluxMixin = Fluxxor.FluxMixin(React);
 
 var Sigma = /*require("sigma")*/ sigma;
 
-function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
 module.exports = React.createClass({
     mixins: [FluxMixin],
     getInitialState: function() {
@@ -24,7 +20,6 @@ module.exports = React.createClass({
                     labelThreshold: 9001,
                     singleHover: true,
                     drawEdgeLabels: false,
-                    minEdgeSize: 0.01,
                     defaultNodeColor: "#000",
                     defaultEdgeColor: "#aaa",
                     edgeColor: "default"
@@ -81,6 +76,10 @@ module.exports = React.createClass({
 
             self.props.graph.currCompleted.forEach(function(id) {
                 graph.graph.nodes(id).color = "#00a";
+            });
+
+            self.props.graph.activeNominations.forEach(function(id) {
+                graph.graph.edges(id).color = "#46c4ff";
             });
         }
 

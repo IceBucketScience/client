@@ -4,14 +4,17 @@ var constants = require("../constants");
 
 module.exports = Fluxxor.createStore({
     initialize: function() {
-        this.nodesMap = {};
         this.nodes = [];
         this.edges = [];
         this.participants = [];
         this.nominations = [];
 
+        this.nodesMap = {};
+        this.edgesMap = {};
+
         this.currNominated = [];
         this.currCompleted = [];
+        this.activeNominations = [];
 
         this.bindActions(
             constants.LOADING_ICE_BUCKET_MAP_SUCCESS, this.onLoadingIceBucketMapSuccess,
@@ -23,6 +26,10 @@ module.exports = Fluxxor.createStore({
 
         graph.nodes.forEach(function(node) {
             self.nodesMap[node.id] = node;
+        });
+
+        graph.edges.forEach(function(edge) {
+            self.edgesMap[edge.id] = edge;
         });
 
         self.nodes = graph.nodes;
@@ -50,6 +57,16 @@ module.exports = Fluxxor.createStore({
             }
         });
 
+        self.nominations.forEach(function(edgeId) {
+            var edge = self.edgesMap[edgeId];
+            var source = self.nodesMap[edge.source];
+            var target = self.nodesMap[edge.target];
+            
+            if (source.timeNominated <= currentPlayTime && target.timeNominated <= currentPlayTime) {
+                self.activeNominations.push(edgeId);
+            }
+        });
+
         self.emit("change");
     },
     getState: function() {
@@ -59,7 +76,8 @@ module.exports = Fluxxor.createStore({
             participants: this.participants,
             nominations: this.nominations,
             currNominated: this.currNominated,
-            currCompleted: this.currCompleted
+            currCompleted: this.currCompleted,
+            activeNominations: this.activeNominations
         };
     }
 });

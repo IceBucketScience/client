@@ -16,24 +16,29 @@ Fb.init({
 var SessionStore = require("./stores/SessionStore");
 var GraphPlayerStore = require("./stores/GraphPlayerStore");
 var GraphStore = require("./stores/GraphStore");
+var SurveyStore = require("./stores/SurveyStore");
 
 var stores = {
     SessionStore: new SessionStore(),
     GraphPlayerStore: new GraphPlayerStore(),
-    GraphStore: new GraphStore()
+    GraphStore: new GraphStore(),
+    SurveyStore: new SurveyStore()
 };
 
 var SessionActions = require("./actions/SessionActions");
 var GraphPlayerActions = require("./actions/GraphPlayerActions");
+var SurveyActions = require("./actions/SurveyActions");
 
 var actions = {
     session: SessionActions,
-    graphPlayer: GraphPlayerActions
+    graphPlayer: GraphPlayerActions,
+    survey: SurveyActions
 };
 
 var FbLoginView = require("./components/FbLoginView.jsx");
 var LoggedInView = require("./components/LoggedInView.jsx");
 var GraphPlayer = require("./components/GraphPlayer.jsx");
+var Survey = require("./components/Survey.jsx");
 
 var App = React.createClass({
     mixins: [FluxMixin, StoreWatchMixin("SessionStore", "GraphStore")],
@@ -63,11 +68,15 @@ var App = React.createClass({
             return <div>
                 {fbPanelContents}
 
+                <Survey />
+
                 <GraphPlayer />
             </div>;
         } else {
             return <div>
                 {fbPanelContents}
+
+                <Survey />
             </div>;
         }
     }
