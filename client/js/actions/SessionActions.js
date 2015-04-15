@@ -33,8 +33,8 @@ function initIndexing(sessionInfo) {
     });
 }
 
-function loadGraph(userId) {
-    return request.get("/graph/" + userId).accept("json").endAsync()
+function loadGraph(userId, accessToken) {
+    return request.get("/graph/" + userId).accept("json").set("X-ACCESS-TOKEN", "blabla").endAsync()
     .then(function(graph) {
         return JSON.parse(graph.text);
     });
@@ -47,7 +47,7 @@ module.exports = {
 
         self.dispatch(constants.FB_LOGIN);
 
-        /*attemptFbLogin()
+        attemptFbLogin()
         .then(function(loginRes) {
             sessionInfo = {
                 userId: loginRes.authResponse.userID,
@@ -72,17 +72,12 @@ module.exports = {
         })
         .then(function() {
             self.dispatch(constants.LOADING_ICE_BUCKET_MAP);
-            return loadGraph(sessionInfo.userId)
-        })*/
-        self.dispatch(constants.FB_LOGIN_SUCCESS, {
-                userId: "100002440675767",
-                accessToken: "CAACNIT113jEBAFYcOY1HQ2ncXAdKIFzjvI2pDAlD3pOr0xefIhtQFNZAjD465W2GzZC0ZC1HH1V44otbZAZAj7xZAREaMf1WsgaHbtq7QYJBErmec9VwYUxOqpxePGUHR73ccC4aQnSHUMXZB0FaGc68ZAIBRPOYldCpFioWUd5Ujv1VZCQ2yetZCN"
-            });
-        self.dispatch(constants.INDEXING_FB_SUCCESS);
-        self.dispatch(constants.LOADING_ICE_BUCKET_MAP);
-        loadGraph("100002440675767")
+            return loadGraph(sessionInfo.userId, sessionInfo.accessToken)
+        })
         .then(function(graph) {
             self.dispatch(constants.LOADING_ICE_BUCKET_MAP_SUCCESS, graph);
+        }, function(err) {
+            self.dispatch(constants.LOADING_ICE_BUCKET_MAP_FAILURE);
         });
     },
     handleAuthStateChange: function(response) {

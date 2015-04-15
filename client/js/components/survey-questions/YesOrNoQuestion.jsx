@@ -1,28 +1,33 @@
 var React = require("react");
 
 module.exports = React.createClass({
-    getInitialState: function() {
-        return {
-            value: null
-        };
-    },
     handleChange: function(e) {
-        this.setState({value: e.target.value});
-        
         this.props.onChange(e.target.value === "YES");
     },
     render: function() {
+        var isYes = this.props.isYes;
+
         return <div>
             {this.props.children}
-            <div>
+            <div className="radio">
                 <label>
-                <input type="radio" name={this.props.name} value="YES" onChange={this.handleChange}/>
+                <input 
+                    type="radio" 
+                    name={this.props.name} 
+                    value="YES" 
+                    onChange={this.handleChange} 
+                    checked={isYes} />
                 Yes
                 </label>
             </div>
-            <div>
+            <div className="radio">
                 <label>
-                <input type="radio" name={this.props.name} value="NO" onChange={this.handleChange}/>
+                <input 
+                    type="radio" 
+                    name={this.props.name} 
+                    value="NO" 
+                    onChange={this.handleChange}
+                    checked={isYes != null && !isYes} />
                 No
                 </label>
             </div>

@@ -60,7 +60,7 @@ module.exports = React.createClass({
             <Graph graph={this.state.graph} />
             <a href="#" onClick={this.startGraphPlayer}>Start Graph</a>
             <a href="#" onClick={this.pauseGraphPlayer}>Pause Graph</a>
-            <p>{this.state.graphPlayer.currentPlayTime}</p>
+            <p>{Date(this.state.graphPlayer.currentPlayTime * 1000)}</p>
         </div>;
     }
 });

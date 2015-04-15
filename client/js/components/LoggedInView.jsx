@@ -5,22 +5,19 @@ var FluxMixin = Fluxxor.FluxMixin(React);
 module.exports = React.createClass({
     mixins: [FluxMixin],
     render: function() {
+        var containerContents
         if (this.props.session.indexingFb) {
-            return <div>
-                <p>indexing...</p>
-            </div>;
+            containerContents = <p>indexing...</p>;
         } else if (this.props.session.indexedSuccessfully && this.props.session.loadingGraph) {
-            return <div>
-                <p>loading graph...</p>
-            </div>;
+            containerContents = <p>loading graph...</p>;
         } else if (this.props.session.graphLoadedSuccessfully) {
-            return <div>
-                <p>thank you for indexing! Click the link below to see the Challenge propogate through your network!</p>
-            </div>;
+            containerContents = <p>thank you for indexing! Click the link below to see the Challenge propogate through your network!</p>;
+        } else {
+            containerContents = <p>whoops! There was an error while indexing.</p>;
         }
         
         return <div>
-            <p>whoops! There was an error while indexing.</p>
+            {containerContents}
         </div>;
     }
 });

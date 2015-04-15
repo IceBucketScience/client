@@ -35,15 +35,17 @@ var actions = {
     survey: SurveyActions
 };
 
-var FbLoginView = require("./components/FbLoginView.jsx");
-var LoggedInView = require("./components/LoggedInView.jsx");
+var Step = require("./components/Step.jsx");
+var FbLoginPanel = require("./components/FbLoginPanel.jsx");
 var GraphPlayer = require("./components/GraphPlayer.jsx");
 var Survey = require("./components/Survey.jsx");
 
 var App = React.createClass({
     mixins: [FluxMixin, StoreWatchMixin("SessionStore", "GraphStore")],
-    componentDidMount: function() {
-        //Fb.Event.subscribe("auth.authResponseChange", this.getFlux().actions.session.handleAuthStateChange);
+    getInitialState: function() {
+        return {
+            graphShown: false
+        };
     },
     getStateFromFlux: function() {
         var flux = this.getFlux();
@@ -52,33 +54,40 @@ var App = React.createClass({
             session: flux.store("SessionStore").getState()
         };
     },
-    isLoggedIn: function() {
-        return this.state.session.userId !== null;
+    handleShowGraph: function() {
+        this.setState({graphShown: true});
     },
     render: function() {
-        var fbPanelContents
-
-        if (this.isLoggedIn()) {
-            fbPanelContents = <LoggedInView session={this.state.session}/>;
-        } else {
-            fbPanelContents = <FbLoginView />;
-        }
-
-        if (this.state.session.graphLoadedSuccessfully) {
-            return <div>
-                {fbPanelContents}
-
-                <Survey />
-
+        var graphPlayer
+        if (this.state.graphShown) {
+            graphPlayer = <div>
                 <GraphPlayer />
             </div>;
-        } else {
-            return <div>
-                {fbPanelContents}
-
-                <Survey />
-            </div>;
+        } else if (this.state.session.graphLoadedSuccessfully) {
+            graphPlayer = <button className="btn btn-primary" onClick={this.handleShowGraph}>Show Graph</button>;
         }
+
+        return <div className="container">
+                <Step 
+                    stepNumber="1"
+                    stepDescription="Login with Facebook">
+                    <FbLoginPanel session={this.state.session} />
+
+                    {graphPlayer}
+                </Step>
+
+                <Step
+                    stepNumber="2"
+                    stepDescription="Fill Out this Short Survey">
+                    <Survey />
+                </Step>
+
+                <Step
+                    stepNumber="3"
+                    stepDescription="Share with Your Friends">
+                    <p>Post this on your favorite social media outlets so your friends can see their own Ice Bucket Challenge map (and help me with my project in the process!)</p>
+                </Step>
+            </div>;
     }
 });
 

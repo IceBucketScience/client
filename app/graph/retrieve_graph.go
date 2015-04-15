@@ -8,13 +8,22 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"shared/facebook"
 	"shared/graph"
 )
 
 func InitGraphRetrievalHandler(server *mux.Router) {
 	server.HandleFunc("/graph/{volunteerId}", func(rw http.ResponseWriter, req *http.Request) {
-		//TODO: add security through submission of accessToken and validation with /debug_token
 		vars := mux.Vars(req)
+
+		if tokenIsValid, tokenValidErr := facebook.TokenIsValid(req.Header.Get("X-ACCESS-TOKEN")); tokenValidErr != nil {
+			rw.WriteHeader(400)
+			log.Println(tokenValidErr)
+			return
+		} else if !tokenIsValid {
+			rw.WriteHeader(401)
+			return
+		}
 
 		graph, getGraphErr := retrieveGraph(vars["volunteerId"])
 		if getGraphErr != nil {

@@ -4,29 +4,20 @@ var moment = require("moment");
 var DatePicker = require("react-datepicker");
 
 module.exports = React.createClass({
-    getInitialState: function() {
-        return {
-            selectedDate: moment.unix(this.props.minDate)
-        };
-    },
     handleChange: function(newDate) {
-        this.setState({
-            selectedDate: newDate
-        });
-
         this.props.onChange(newDate.unix());
     },
     render: function() {
         var dateFormat = "MM/DD/YYYY";
 
-        return <div>
-            <label>{this.props.children}</label>
+        return <div className="form-group">
+            {this.props.children}
             <DatePicker 
                 dateFormat={dateFormat}
                 minDate={moment.unix(this.props.minDate)}
                 maxDate={moment.unix(this.props.maxDate)}
                 onChange={this.handleChange} 
-                selected={this.state.selectedDate} />
+                selected={moment.unix(this.props.currDate)} />
         </div>;
     }
 });

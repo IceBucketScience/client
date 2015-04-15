@@ -35,9 +35,9 @@ module.exports = React.createClass({
         this.getFlux().actions.survey.changeSurveyResponse("donationDate", newDate);
     },
     surveyIsValid: function() {
-        return this.state.facebookName != null && 
+        return this.state.facebookName != null && this.state.facebookName != "" &&
             this.state.didDonate != null && 
-            (!this.state.didDonate || this.state.isFirstDonation) &&
+            (!this.state.didDonate || (this.state.didDonate && this.state.isFirstDonation != null)) &&
             this.state.donationDate != null;
     },
     handleSubmit: function(e) {
@@ -53,33 +53,53 @@ module.exports = React.createClass({
         var isFirstDonationQuestion, donationDateQuestion;
 
         if (this.state.didDonate) {
-            isFirstDonationQuestion = <YesOrNoQuestion name="FirstDonation" onChange={this.handleFirstDonationChange}>
-                <p>Was this your first time donating to the ALSA?</p>
+            isFirstDonationQuestion = <YesOrNoQuestion 
+                name="FirstDonation" 
+                isYes={this.state.isFirstDonation}
+                onChange={this.handleFirstDonationChange}>
+                <label>c) Was this your first time donating to the ALSA?</label>
             </YesOrNoQuestion>;
 
             donationDateQuestion = <DateQuestion 
                 name="DateDonated"
+                currDate={this.state.donationDate}
                 onChange={this.handleDonationDateChange} 
                 minDate={getUnixTimestampFor(2014, 5, 15)}
                 maxDate={getUnixTimestampFor(2014, 10, 1)}>
-                <p>Test</p>
+                <label>d) On what day between May 15th and October 1st (inclusive) did you make your donation?</label>
+                <span className="help-block">
+                    To find out when you donated, you can:
+                    <ul>
+                        <li>Search your email for the donation receipt sent by the ALSA</li>
+                        <li>If you donated when you completed the Ice Bucket Challenge, find your Facebook post about completing the Challenge</li>
+                        <li>Search through your credit card or banking transactions to find your donation</li>
+                    </ul>
+                </span>
             </DateQuestion>;
         }
         
-        return <form>
-            <TextQuestion name="FacebookName" onChange={this.handleFacebookNameChange}>
-                What is your full name EXACTLY as it appears on Facebook today?
-            </TextQuestion>
+        return <div>
+            <form>
+                <TextQuestion 
+                    name="FacebookName" 
+                    value={this.state.facebookName}
+                    onChange={this.handleFacebookNameChange}>
+                    <label htmlFor="FacebookName">a) What is your full name <em>exactly</em> as it appears on Facebook today?</label>
+                </TextQuestion>
 
-            <YesOrNoQuestion name="DidDonate" onChange={this.handleDidDonateChange}>
-                <p>Did you donate to the ALS Association between May 15th and October 1st (inclusive)?</p>
-            </YesOrNoQuestion>
+                <YesOrNoQuestion 
+                    name="DidDonate" 
+                    isYes={this.state.didDonate}
+                    onChange={this.handleDidDonateChange}>
+                    <label> b) Did you donate to the <a href="http://www.alsa.org/">ALS Association</a> between May 15th and October 1st (inclusive)?</label>
+                </YesOrNoQuestion>
 
-            {isFirstDonationQuestion}
+                {isFirstDonationQuestion}
 
-            {donationDateQuestion}
+                {donationDateQuestion}
 
-            <button type="submit" onClick={this.handleSubmit} disabled={!this.surveyIsValid()}>Submit</button>
-        </form>;
+                <button type="submit" className="btn btn-primary" onClick={this.handleSubmit} disabled={!this.surveyIsValid()}>Submit</button>
+            </form>
+        </div>;
     }
 });

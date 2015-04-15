@@ -10,6 +10,7 @@ import (
 	"client/app/config_vars"
 	graphServer "client/app/graph"
 	"client/app/index"
+	"client/app/survey"
 	"shared/config"
 	"shared/facebook"
 	"shared/graph"
@@ -29,6 +30,8 @@ func main() {
 	index.InitIndexRequestHandler(server, &configuration)
 
 	graphServer.InitGraphRetrievalHandler(server)
+
+	survey.InitSurveyResponseHandler(server)
 
 	log.Fatalln(http.ListenAndServe(":"+configuration.Port, server))
 }
