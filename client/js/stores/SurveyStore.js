@@ -5,6 +5,8 @@ var getUnixTimestampFor = require("../util").getUnixTimestampFor;
 
 module.exports = Fluxxor.createStore({
     initialize: function() {
+        this.submitted = false;
+        
         this.resetSurvey();
 
         this.bindActions(
@@ -24,6 +26,7 @@ module.exports = Fluxxor.createStore({
         this.emit("change");
     },
     onSubmitSurveyResponseSuccess: function() {
+        this.submitted = true;
         this.resetSurvey();
 
         this.emit("change");
@@ -33,7 +36,8 @@ module.exports = Fluxxor.createStore({
             facebookName: this.facebookName,
             didDonate: this.didDonate,
             isFirstDonation: this.isFirstDonation,
-            donationDate: this.donationDate
+            donationDate: this.donationDate,
+            submitted: this.submitted
         };
     }
 });

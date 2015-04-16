@@ -102,6 +102,7 @@ func waitForIndexingCompletion(userId string) error {
 	var indexingErr error
 
 	successCallbackId := indexingJobCompletionQueue.RegisterCallback("SUCCESS", func(payload map[string]interface{}) {
+		log.Println(payload)
 		if payload["userId"] == userId {
 			indexingComplete <- true
 
@@ -109,6 +110,7 @@ func waitForIndexingCompletion(userId string) error {
 	})
 
 	failureCallbackId := indexingJobCompletionQueue.RegisterCallback("FAILURE", func(payload map[string]interface{}) {
+		log.Println(payload)
 		if payload["userId"] == userId {
 			indexingErr = errors.New(payload["message"].(string))
 			indexingComplete <- true

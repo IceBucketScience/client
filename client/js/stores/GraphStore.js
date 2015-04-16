@@ -24,16 +24,20 @@ module.exports = Fluxxor.createStore({
     onLoadingIceBucketMapSuccess: function(graph) {
         var self = this;
 
-        graph.nodes.forEach(function(node) {
+        self.nodes = graph.nodes.map(function(node) {
             self.nodesMap[node.id] = node;
+            return node;
         });
 
-        graph.edges.forEach(function(edge) {
-            self.edgesMap[edge.id] = edge;
+        self.edges = graph.edges.filter(function(edge) {
+            var isValidEdge = self.nodesMap[edge.target] && self.nodesMap[edge.source];
+            if (isValidEdge) {
+                self.edgesMap[edge.id] = edge;
+            }
+
+            return isValidEdge;
         });
 
-        self.nodes = graph.nodes;
-        self.edges = graph.edges;
         self.participants = graph.participants;
         self.nominations = graph.nominations;
 

@@ -35,7 +35,7 @@ var actions = {
     survey: SurveyActions
 };
 
-var Step = require("./components/Step.jsx");
+var Block = require("./components/Block.jsx");
 var FbLoginPanel = require("./components/FbLoginPanel.jsx");
 var GraphPlayer = require("./components/GraphPlayer.jsx");
 var Survey = require("./components/Survey.jsx");
@@ -58,35 +58,54 @@ var App = React.createClass({
         this.setState({graphShown: true});
     },
     render: function() {
-        var graphPlayer
-        if (this.state.graphShown) {
-            graphPlayer = <div>
-                <GraphPlayer />
-            </div>;
-        } else if (this.state.session.graphLoadedSuccessfully) {
-            graphPlayer = <button className="btn btn-primary" onClick={this.handleShowGraph}>Show Graph</button>;
-        }
-
         return <div className="container">
-                <Step 
-                    stepNumber="1"
-                    stepDescription="Login with Facebook">
-                    <FbLoginPanel session={this.state.session} />
+                <div className="row">
+                    <div className="col-sm-10 col-sm-offset-1">
+                        <h1 className="text-center">How do social connections affect our philanthropic behavior?</h1>
+                        <div className="row" style={{marginTop: 24}}>
+                            <div className="col-sm-3">
+                                <img className="img-responsive img-circle" src="/static/assets/brad_photo.jpg" style={{width: "100%", marginLeft: "auto", marginRight: "auto"}}/>
+                            </div>
+                            <div className="col-sm-9">
+                                <h4 className="lead">I'm Brad Ross, and for my high school senior thesis project, I want to explore this topic by studying the <a href="http://www.alsa.org/fight-als/ice-bucket-challenge.html">#ALSIceBucketChallenge</a>. To do so, <strong>I need you to answer a few questions and allow a program I wrote to analyze posts on your 5/14 - 9/14 News Feed.</strong> I promise I'll protect your privacy--see below for details.</h4>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-sm-12">
+                                <h4 className="lead">My access to Facebook data will disappear in less than two weeks, so <strong>I need your approval in the next few days</strong> in order to complete my work. If you're interested in seeing the results, shoot me an email at brad.ross.35@gmail.com. Thanks in advance!</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                    {graphPlayer}
-                </Step>
+                <div className="row">
+                    <Block
+                        size="6"
+                        description="Login with Facebook">
+                        <FbLoginPanel session={this.state.session} />
+                    </Block>
 
-                <Step
-                    stepNumber="2"
-                    stepDescription="Fill Out this Short Survey">
-                    <Survey />
-                </Step>
+                    <Block
+                        size="6"
+                        description="Fill Out This Short Survey">
+                        <Survey />
+                    </Block>
+                </div>
 
-                <Step
-                    stepNumber="3"
-                    stepDescription="Share with Your Friends">
-                    <p>Post this on your favorite social media outlets so your friends can see their own Ice Bucket Challenge map (and help me with my project in the process!)</p>
-                </Step>
+                <div className="row">
+                    <Block
+                        size="12"
+                        description="Explore the Ice Bucket Challenge in Your Network">
+                        <GraphPlayer />
+                    </Block>
+                </div>
+
+                <div className="row">
+                    <div className="col-sm-8 col-sm-offset-2 text-center">
+                        <h1>Isn't this Cool?</h1>
+                        <h3 className="lead">If you think so (I certainly do), <strong>please share this with your friends</strong> through Facebook or another social media platform of choice.</h3>
+                    </div>
+                </div>
             </div>;
     }
 });

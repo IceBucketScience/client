@@ -26,13 +26,10 @@
   },
   "dependencies": {
     "bluebird": "^2.9.14",
-    "chart.js": "^1.0.2",
     "fluxxor": "^1.5.2",
     "lodash": "^3.5.0",
     "moment": "^2.10.2",
-    "radium": "^0.10.1",
     "react": "^0.13.1",
-    "react-date-picker": "^2.0.15",
     "react-datepicker": "^0.6.2",
     "sigma": "^1.0.3",
     "superagent": "^1.1.0"

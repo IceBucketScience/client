@@ -56,10 +56,10 @@ module.exports = React.createClass({
         }
     },
     render: function() {
-        return <div>
+        return <div className="col-sm-12">
             <Graph graph={this.state.graph} />
-            <a href="#" onClick={this.startGraphPlayer}>Start Graph</a>
-            <a href="#" onClick={this.pauseGraphPlayer}>Pause Graph</a>
+            <button className="btn btn-default" onClick={this.startGraphPlayer}>Start Graph</button>
+            <button className="btn btn-default" onClick={this.pauseGraphPlayer}>Pause Graph</button>
             <p>{Date(this.state.graphPlayer.currentPlayTime * 1000)}</p>
         </div>;
     }

@@ -19,7 +19,8 @@ module.exports = React.createClass({
             facebookName: surveyStoreState.facebookName,
             didDonate: surveyStoreState.didDonate,
             isFirstDonation: surveyStoreState.isFirstDonation,
-            donationDate: surveyStoreState.donationDate
+            donationDate: surveyStoreState.donationDate,
+            submitted: surveyStoreState.submitted
         };
     },
     handleFacebookNameChange: function(fbName) {
@@ -50,56 +51,62 @@ module.exports = React.createClass({
         }
     },
     render: function() {
-        var isFirstDonationQuestion, donationDateQuestion;
+        if (!this.state.submitted) {
+            var isFirstDonationQuestion, donationDateQuestion;
 
-        if (this.state.didDonate) {
-            isFirstDonationQuestion = <YesOrNoQuestion 
-                name="FirstDonation" 
-                isYes={this.state.isFirstDonation}
-                onChange={this.handleFirstDonationChange}>
-                <label>c) Was this your first time donating to the ALSA?</label>
-            </YesOrNoQuestion>;
+            if (this.state.didDonate) {
+                isFirstDonationQuestion = <YesOrNoQuestion 
+                    name="FirstDonation" 
+                    isYes={this.state.isFirstDonation}
+                    onChange={this.handleFirstDonationChange}>
+                    <label>c) Was this your first time donating to the ALSA?</label>
+                </YesOrNoQuestion>;
 
-            donationDateQuestion = <DateQuestion 
-                name="DateDonated"
-                currDate={this.state.donationDate}
-                onChange={this.handleDonationDateChange} 
-                minDate={getUnixTimestampFor(2014, 5, 15)}
-                maxDate={getUnixTimestampFor(2014, 10, 1)}>
-                <label>d) On what day between May 15th and October 1st (inclusive) did you make your donation?</label>
-                <span className="help-block">
-                    To find out when you donated, you can:
-                    <ul>
-                        <li>Search your email for the donation receipt sent by the ALSA</li>
-                        <li>If you donated when you completed the Ice Bucket Challenge, find your Facebook post about completing the Challenge</li>
-                        <li>Search through your credit card or banking transactions to find your donation</li>
-                    </ul>
-                </span>
-            </DateQuestion>;
+                donationDateQuestion = <DateQuestion 
+                    name="DateDonated"
+                    currDate={this.state.donationDate}
+                    onChange={this.handleDonationDateChange} 
+                    minDate={getUnixTimestampFor(2014, 5, 15)}
+                    maxDate={getUnixTimestampFor(2014, 10, 1)}>
+                    <label>d) On what date between May 15th and October 1st (inclusive) did you make your donation?</label>
+                    <span className="help-block">
+                        To find out when you donated, you can:
+                        <ul>
+                            <li>Search your email for the donation receipt sent by the ALSA</li>
+                            <li>Find your Facebook post about completing the Challenge if you donated when you posted</li>
+                            <li>Search through your credit card or banking transactions</li>
+                        </ul>
+                    </span>
+                </DateQuestion>;
+            }
+            
+            return <div>
+                <form>
+                    <TextQuestion 
+                        name="FacebookName" 
+                        value={this.state.facebookName}
+                        onChange={this.handleFacebookNameChange}>
+                        <label htmlFor="FacebookName">a) What is your full name <em>exactly</em> as it appears on Facebook today?</label>
+                    </TextQuestion>
+
+                    <YesOrNoQuestion 
+                        name="DidDonate" 
+                        isYes={this.state.didDonate}
+                        onChange={this.handleDidDonateChange}>
+                        <label> b) Did you donate to the <a href="http://www.alsa.org/">ALS Association</a> between May 15th and October 1st (inclusive)?</label>
+                    </YesOrNoQuestion>
+
+                    {isFirstDonationQuestion}
+
+                    {donationDateQuestion}
+
+                    <button type="submit" className="btn btn-primary" onClick={this.handleSubmit} disabled={!this.surveyIsValid()}>Submit</button>
+                </form>
+            </div>;
+        } else {
+            return <div>
+                <p className="lead">Thanks for telling me about your donation behavior related to the Ice Bucket Challenge!</p>
+            </div>;
         }
-        
-        return <div>
-            <form>
-                <TextQuestion 
-                    name="FacebookName" 
-                    value={this.state.facebookName}
-                    onChange={this.handleFacebookNameChange}>
-                    <label htmlFor="FacebookName">a) What is your full name <em>exactly</em> as it appears on Facebook today?</label>
-                </TextQuestion>
-
-                <YesOrNoQuestion 
-                    name="DidDonate" 
-                    isYes={this.state.didDonate}
-                    onChange={this.handleDidDonateChange}>
-                    <label> b) Did you donate to the <a href="http://www.alsa.org/">ALS Association</a> between May 15th and October 1st (inclusive)?</label>
-                </YesOrNoQuestion>
-
-                {isFirstDonationQuestion}
-
-                {donationDateQuestion}
-
-                <button type="submit" className="btn btn-primary" onClick={this.handleSubmit} disabled={!this.surveyIsValid()}>Submit</button>
-            </form>
-        </div>;
     }
 });

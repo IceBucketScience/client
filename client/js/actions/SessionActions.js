@@ -34,7 +34,7 @@ function initIndexing(sessionInfo) {
 }
 
 function loadGraph(userId, accessToken) {
-    return request.get("/graph/" + userId).accept("json").set("X-ACCESS-TOKEN", "blabla").endAsync()
+    return request.get("/graph/" + userId).accept("json").set("X-ACCESS-TOKEN", accessToken).endAsync()
     .then(function(graph) {
         return JSON.parse(graph.text);
     });
