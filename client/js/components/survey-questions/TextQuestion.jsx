@@ -12,7 +12,7 @@ module.exports = React.createClass({
         return <div className={formGroupClasses}>
             {this.props.children}
             <div className="row">
-                <div className="col-xs-6"> 
+                <div className="col-xs-8"> 
                     <input type="text" className="form-control" id={this.props.name} value={this.props.value} onChange={this.handleChange} />
                 </div>
             </div>

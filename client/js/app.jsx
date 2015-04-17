@@ -72,7 +72,7 @@ var App = React.createClass({
                         </div>
                         <div className="row">
                             <div className="col-sm-12">
-                                <h4 className="lead">My access to Facebook data will disappear in less than two weeks, so <strong>I need your approval in the next few days</strong> in order to complete my work. If you're interested in seeing the results, shoot me an email at brad.ross.35@gmail.com. Thanks in advance!</h4>
+                                <h4 className="lead">My access to Facebook data will disappear in less than two weeks, so <strong>I need you to let my program analyze your network in the next few days</strong> in order to complete my work. If you're interested in seeing the results, shoot me an email at brad.ross.35@gmail.com. Thanks in advance!</h4>
                             </div>
                         </div>
                     </div>
@@ -81,7 +81,7 @@ var App = React.createClass({
                 <div className="row">
                     <Block
                         size="6"
-                        description="Login with Facebook">
+                        description="Index Your Facebook">
                         <FbLoginPanel session={this.state.session} />
                     </Block>
 
@@ -102,7 +102,7 @@ var App = React.createClass({
 
                 <div className="row">
                     <div className="col-sm-8 col-sm-offset-2 text-center">
-                        <h1>Isn't this Cool?</h1>
+                        <h1>Isn't This Cool?</h1>
                         <h3 className="lead">If you think so (I certainly do), <strong>please share this with your friends</strong> through Facebook or another social media platform of choice.</h3>
                     </div>
                 </div>

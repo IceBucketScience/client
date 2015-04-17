@@ -4,6 +4,8 @@ var constants = require("../constants");
 
 module.exports = Fluxxor.createStore({
     initialize: function() {
+        this.graphLoaded = false;
+        this.inInitialState = true;
         this.nodes = [];
         this.edges = [];
         this.participants = [];
@@ -18,11 +20,14 @@ module.exports = Fluxxor.createStore({
 
         this.bindActions(
             constants.LOADING_ICE_BUCKET_MAP_SUCCESS, this.onLoadingIceBucketMapSuccess,
+            constants.RESTART_GRAPH_PLAYER, this.onResetGraph,
             constants.UPDATE_GRAPH, this.onUpdateGraph
         );
     },
     onLoadingIceBucketMapSuccess: function(graph) {
         var self = this;
+
+        self.graphLoaded = true;
 
         self.nodes = graph.nodes.map(function(node) {
             self.nodesMap[node.id] = node;
@@ -46,6 +51,8 @@ module.exports = Fluxxor.createStore({
     onUpdateGraph: function(payload) {
         var self = this;
 
+        self.inInitialState = false;
+
         var currentPlayTime = payload.currentPlayTime;
 
         self.currNominated = [];
@@ -63,18 +70,31 @@ module.exports = Fluxxor.createStore({
 
         self.nominations.forEach(function(edgeId) {
             var edge = self.edgesMap[edgeId];
-            var source = self.nodesMap[edge.source];
-            var target = self.nodesMap[edge.target];
-            
-            if (source.timeNominated <= currentPlayTime && target.timeNominated <= currentPlayTime) {
-                self.activeNominations.push(edgeId);
+
+            if (edge) {
+                var source = self.nodesMap[edge.source];
+                var target = self.nodesMap[edge.target];
+                
+                if (source.timeNominated <= currentPlayTime && target.timeNominated <= currentPlayTime) {
+                    self.activeNominations.push(edgeId);
+                }
             }
         });
 
         self.emit("change");
     },
+    onResetGraph: function() {
+        this.inInitialState = true;
+
+        this.currNominated = [];
+        this.currCompleted = [];
+
+        this.emit("change");
+    },
     getState: function() {
         return {
+            graphLoaded: this.graphLoaded,
+            inInitialState: this.inInitialState,
             nodes: this.nodes,
             edges: this.edges,
             participants: this.participants,

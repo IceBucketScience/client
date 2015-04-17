@@ -9,7 +9,12 @@ module.exports = React.createClass({
     getInitialState: function() {
         return {
             sigmaGraph: null,
-            initialRenderComplete: false
+            initialRenderComplete: false,
+            defaultNodeColor: "#858585",
+            defaultEdgeColor: "#ddd",
+            nominatedNodeColor: "#f0ad4e",
+            completedNodeColor: "#5bc0de",
+            nominationEdgeColor: "#337ab7" 
         };
     },
     componentDidMount: function() {
@@ -20,8 +25,8 @@ module.exports = React.createClass({
                     labelThreshold: 9001,
                     singleHover: true,
                     drawEdgeLabels: false,
-                    defaultNodeColor: "#000",
-                    defaultEdgeColor: "#aaa",
+                    defaultNodeColor: this.state.defaultNodeColor,
+                    defaultEdgeColor: this.state.defaultEdgeColor,
                     edgeColor: "default"
                 }
             })
@@ -41,7 +46,6 @@ module.exports = React.createClass({
 
                 if (index === 0) {
                     node.size = 2;
-                    node.color = "#e00";
                 }
 
                 return node;
@@ -67,19 +71,25 @@ module.exports = React.createClass({
             self.props.graph.nodes.length > 0 &&
             self.props.graph.nodes.length > 0) {
             self.initialRenderGraph(graph);
-        }
-        
-        if (self.state.initialRenderComplete) {
+        } else if (self.state.initialRenderComplete && self.props.graph.inInitialState) {
+            graph.graph.nodes().forEach(function(node) {
+                node.color = self.state.defaultNodeColor;
+            });
+
+            graph.graph.edges().forEach(function(edge) {
+                edge.color = self.state.defaultEdgeColor;
+            });
+        } else if (self.state.initialRenderComplete) {
             self.props.graph.currNominated.forEach(function(id) {
-                graph.graph.nodes(id).color = "#a00";
+                graph.graph.nodes(id).color = self.state.nominatedNodeColor;
             });
 
             self.props.graph.currCompleted.forEach(function(id) {
-                graph.graph.nodes(id).color = "#00a";
+                graph.graph.nodes(id).color = self.state.completedNodeColor;
             });
 
             self.props.graph.activeNominations.forEach(function(id) {
-                graph.graph.edges(id).color = "#46c4ff";
+                graph.graph.edges(id).color = self.state.nominationEdgeColor;
             });
         }
 
@@ -89,9 +99,8 @@ module.exports = React.createClass({
         var graphContainerStyle = {
             width: "100%",
             height: 500,
-            border: 1,
-            borderStyle: "solid",
-            borderColor: "#000"
+            border: "1px solid #ddd",
+            borderRadius: 4
         };
 
         return <div id="graph-container" style={graphContainerStyle}></div>;
