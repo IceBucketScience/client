@@ -498,7 +498,7 @@ module.exports = React.createClass({displayName: "exports",
     },
     render: function() {
         return React.createElement("div", {className: "text-center"}, 
-            React.createElement("div", {className: "row"}, React.createElement("div", {className: "col-sm-12"}, React.createElement("p", {className: "lead"}, "Please click the button below to have my server analyze your network."))), 
+            React.createElement("div", {className: "row"}, React.createElement("div", {className: "col-sm-12"}, React.createElement("p", {className: "lead"}, "Please click the button below to have my server analyze your network."), React.createElement("p", null, "If you've already had your network indexed before, you can still click this button to reload the visualization of your network."))), 
             React.createElement("div", {className: "row"}, React.createElement("div", {className: "col-sm-8 col-sm-offset-2"}, React.createElement("button", {className: "btn btn-primary btn-block", onClick: this.login}, "Index Your Facebook"))), 
             React.createElement("div", {className: "row"}, React.createElement("div", {className: "col-sm-12"}, React.createElement("p", {style: {marginTop: 20}}, "The program will ", React.createElement("strong", null, "map your friendships and only access Ice Bucket Challenge-related posts on your historical News Feed. It CANNOT post anything."), " I will not store any other data on my server, and none of your data will be made public in the course of my research. After I complete my project, I will permanently delete your information from my database.")))
         );
