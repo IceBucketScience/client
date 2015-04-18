@@ -218,18 +218,22 @@ function attemptFbLogin() {
 }
 
 function initIndexing(sessionInfo) {
-    return request.post("/index/").send(sessionInfo).endAsync()
+    return request.post("/index").send(sessionInfo).endAsync()
     .then(function() {
-        var interval = setInterval(function() {
-            request.get("/indexed/" + sessionInfo.userId).endAsync()
-            .then(function(res) {
-                if (res.isIndexed) {
-                    return;
-                }
-            }, function(err) {
-                
-            });
-        }, 10 * 1000); 
+        return new Promise(function(resolve, reject) {
+            var interval = setInterval(function() {
+                request.get("/indexed/" + sessionInfo.userId).endAsync()
+                .then(function(rawRes) {
+                    var res = JSON.parse(rawRes.text);
+                    if (res.isIndexed) {
+                        clearInterval(interval);
+                        resolve();
+                    }
+                }, function(err) {
+                    reject(err);
+                });
+            }, 10 * 1000);
+        });
     });
 }
 
