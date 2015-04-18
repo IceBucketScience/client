@@ -114,7 +114,7 @@ module.exports = React.createClass({
             </div>
             <Graph graph={this.state.graph} />
             <div className="row">
-                <div className="col-sm-9 btn-toolbar" style={{marginTop: 20}}>
+                <div className="col-sm-8 btn-toolbar" style={{marginTop: 20}}>
                 <div className="btn-group">
                     <button className={playClasses} onClick={this.startGraphPlayer} disabled={!this.state.graph.graphLoaded}>Start</button>
                     <button className={pauseClasses} onClick={this.pauseGraphPlayer} disabled={!this.state.graph.graphLoaded}>Pause</button>
@@ -126,7 +126,7 @@ module.exports = React.createClass({
                     <button className={speedSettingClasses.FAST} onClick={this.setPlaySpeed("FAST")}>Fast</button>
                 </div>
                 </div>
-                <div className="col-sm-3 text-right">
+                <div className="col-sm-4 text-right">
                     <h3>{moment.unix(this.state.graphPlayer.currentPlayTime).format("MMM Do, YYYY")}</h3>
                 </div>
             </div>

@@ -27,9 +27,17 @@ function attemptFbLogin() {
 }
 
 function initIndexing(sessionInfo) {
-    return request.post("/index").send(sessionInfo).endAsync()
-    .then(function(res) {
-        return res.alreadyIndexed;
+    return new Promise(function(resolve, reject) {
+        var interval = setInterval(function() {
+            request.post("/index").send(sessionInfo).endAsync()
+            .then(function(res) {
+                if (res.isIndexed) {
+                    resolve();
+                }
+            }, function(err) {
+                reject(err);
+            });
+        }, 10 * 1000); 
     });
 }
 

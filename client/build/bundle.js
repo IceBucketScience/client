@@ -218,9 +218,17 @@ function attemptFbLogin() {
 }
 
 function initIndexing(sessionInfo) {
-    return request.post("/index").send(sessionInfo).endAsync()
-    .then(function(res) {
-        return res.alreadyIndexed;
+    return new Promise(function(resolve, reject) {
+        var interval = setInterval(function() {
+            request.post("/index").send(sessionInfo).endAsync()
+            .then(function(res) {
+                if (res.isIndexed) {
+                    resolve();
+                }
+            }, function(err) {
+                reject(err);
+            });
+        }, 10 * 1000); 
     });
 }
 
@@ -719,7 +727,7 @@ module.exports = React.createClass({displayName: "exports",
             ), 
             React.createElement(Graph, {graph: this.state.graph}), 
             React.createElement("div", {className: "row"}, 
-                React.createElement("div", {className: "col-sm-9 btn-toolbar", style: {marginTop: 20}}, 
+                React.createElement("div", {className: "col-sm-8 btn-toolbar", style: {marginTop: 20}}, 
                 React.createElement("div", {className: "btn-group"}, 
                     React.createElement("button", {className: playClasses, onClick: this.startGraphPlayer, disabled: !this.state.graph.graphLoaded}, "Start"), 
                     React.createElement("button", {className: pauseClasses, onClick: this.pauseGraphPlayer, disabled: !this.state.graph.graphLoaded}, "Pause")
@@ -731,7 +739,7 @@ module.exports = React.createClass({displayName: "exports",
                     React.createElement("button", {className: speedSettingClasses.FAST, onClick: this.setPlaySpeed("FAST")}, "Fast")
                 )
                 ), 
-                React.createElement("div", {className: "col-sm-3 text-right"}, 
+                React.createElement("div", {className: "col-sm-4 text-right"}, 
                     React.createElement("h3", null, moment.unix(this.state.graphPlayer.currentPlayTime).format("MMM Do, YYYY"))
                 )
             )

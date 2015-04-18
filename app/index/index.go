@@ -31,6 +31,7 @@ func InitIndexRequestHandler(server *mux.Router, config *configVars.Configuratio
 	indexingJobCompletionQueue = indexingJobCompletionQueueObj
 
 	server.HandleFunc("/index", handleIndexRequest).Methods("POST")
+	server.HandleFunc("/indexed/{volunteerId}", handleIsIndexedRequest).Methods("GET")
 
 	return nil
 }
@@ -85,14 +86,14 @@ func handleIndexRequest(rw http.ResponseWriter, req *http.Request) {
 		log.Println("[SENT INDEX_REQUEST]", indexRequest.UserId)
 	}
 
-	indexingErr := waitForIndexingCompletion(indexRequest.UserId)
+	/*indexingErr := waitForIndexingCompletion(indexRequest.UserId)
 	if indexingErr != nil {
 		rw.WriteHeader(400)
 		log.Println(indexingErr)
 		return
-	}
+	}*/
 
-	log.Println("[INDEX_REQUEST_SUCCESSFUL]", indexRequest.UserId)
+	// log.Println("[INDEX_REQUEST_SUCCESSFUL]", indexRequest.UserId)
 
 	rw.WriteHeader(200)
 }
@@ -124,4 +125,27 @@ func waitForIndexingCompletion(userId string) error {
 	indexingJobCompletionQueue.UnregisterCallback(failureCallbackId)
 
 	return indexingErr
+}
+
+type IsIndexedResponse struct {
+	IsIndexed bool `json:"isIndexed"`
+}
+
+func handleIsIndexedRequest(rw http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+
+	volunteer, volunteerSearchErr := graph.FindVolunteer(vars["volunteerId"])
+	resEncoder := json.NewEncoder(rw)
+
+	if volunteerSearchErr != nil {
+		rw.WriteHeader(400)
+		log.Println(volunteerSearchErr)
+		return
+	} else if volunteer != nil && volunteer.IsIndexed {
+		resEncoder.Encode(IsIndexedResponse{IsIndexed: true})
+		return
+	}
+
+	resEncoder.Encode(IsIndexedResponse{IsIndexed: false})
+	return
 }
