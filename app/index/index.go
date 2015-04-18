@@ -74,7 +74,7 @@ func handleIndexRequest(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	currIndexingRequests[indexRequest.UserId] = IndexingRequestStatus{DoneIndexing: false}
-
+	log.Println(currIndexingRequests)
 	if volunteer == nil {
 		longTermToken, _, exchangeErr := facebook.GetLongTermToken(indexRequest.AccessToken)
 		if exchangeErr != nil {
