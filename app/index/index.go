@@ -131,7 +131,7 @@ func handleIsIndexedRequest(rw http.ResponseWriter, req *http.Request) {
 
 	volunteer, volunteerSearchErr := graph.FindVolunteer(vars["volunteerId"])
 	resEncoder := json.NewEncoder(rw)
-
+	log.Println(currIndexingRequests)
 	currIndexRequest, indexRequestExists := currIndexingRequests[volunteer.FbId]
 
 	if volunteerSearchErr != nil {
