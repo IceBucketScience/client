@@ -50,6 +50,6 @@ func InitClientServer(clientUrl string, server *mux.Router, config *configVars.C
 
 	staticBaseUrl := clientUrl + "static/"
 
-	staticFileServer := http.StripPrefix(staticBaseUrl, http.FileServer(http.Dir("client")))
+	staticFileServer := http.StripPrefix(staticBaseUrl, http.FileServer(http.Dir(config.ClientPath)))
 	server.PathPrefix(staticBaseUrl).Handler(staticFileServer)
 }
