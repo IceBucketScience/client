@@ -17,9 +17,18 @@ import (
 var indexingJobQueue *msgQueue.DispatcherQueue
 var indexingJobCompletionQueue *msgQueue.RecieverQueue
 
+type IndexingRequestStatus struct {
+	DoneIndexing bool
+	IndexingErr  error
+}
+
+var currIndexingRequests map[string]IndexingRequestStatus
+
 func InitIndexRequestHandler(server *mux.Router, config *configVars.Configuration) error {
 	indexingJobQueueObj, indexingJobQueueCreationErr := msgQueue.CreateDispatcherQueue("indexing_job_queue")
 	indexingJobCompletionQueueObj, indexingJobCompletionQueueCreationErr := msgQueue.CreateRecieverQueue("indexing_job_completion_queue", config.BaseUrl, server)
+
+	currIndexingRequests = map[string]IndexingRequestStatus{}
 
 	if indexingJobQueueCreationErr != nil {
 		return indexingJobQueueCreationErr
@@ -62,13 +71,11 @@ func handleIndexRequest(rw http.ResponseWriter, req *http.Request) {
 		rw.WriteHeader(400)
 		log.Println(volunteerSearchErr)
 		return
-	} else if volunteer != nil && volunteer.IsIndexed {
-		json.NewEncoder(rw).Encode(AlreadyIndexedResponse{AlreadyIndexed: true})
-		return
 	}
 
-	if volunteer == nil {
+	currIndexingRequests[indexRequest.UserId] = IndexingRequestStatus{DoneIndexing: false}
 
+	if volunteer == nil {
 		longTermToken, _, exchangeErr := facebook.GetLongTermToken(indexRequest.AccessToken)
 		if exchangeErr != nil {
 			rw.WriteHeader(400)
@@ -84,47 +91,35 @@ func handleIndexRequest(rw http.ResponseWriter, req *http.Request) {
 		}
 
 		log.Println("[SENT INDEX_REQUEST]", indexRequest.UserId)
+	} else if volunteer.IsIndexed {
+		currIndexingRequests[indexRequest.UserId] = IndexingRequestStatus{DoneIndexing: true}
+		rw.WriteHeader(200)
+		return
 	}
 
-	/*indexingErr := waitForIndexingCompletion(indexRequest.UserId)
-	if indexingErr != nil {
-		rw.WriteHeader(400)
-		log.Println(indexingErr)
-		return
-	}*/
+	listenForIndexingCompletion(indexRequest.UserId)
 
 	// log.Println("[INDEX_REQUEST_SUCCESSFUL]", indexRequest.UserId)
 
 	rw.WriteHeader(200)
 }
 
-func waitForIndexingCompletion(userId string) error {
-	indexingComplete := make(chan bool)
-	var indexingErr error
-
-	successCallbackId := indexingJobCompletionQueue.RegisterCallback("SUCCESS", func(payload map[string]interface{}) {
-		log.Println(payload)
+func listenForIndexingCompletion(userId string) {
+	indexingJobCompletionQueue.RegisterOnce("SUCCESS", func(payload map[string]interface{}) {
 		if payload["userId"] == userId {
-			indexingComplete <- true
-
+			currIndexingRequests[userId] = IndexingRequestStatus{DoneIndexing: true}
+			log.Println(currIndexingRequests)
+			//indexingJobCompletionQueue.UnregisterCallback(successCallbackId)
 		}
 	})
 
-	failureCallbackId := indexingJobCompletionQueue.RegisterCallback("FAILURE", func(payload map[string]interface{}) {
-		log.Println(payload)
+	indexingJobCompletionQueue.RegisterOnce("FAILURE", func(payload map[string]interface{}) {
 		if payload["userId"] == userId {
-			indexingErr = errors.New(payload["message"].(string))
-			indexingComplete <- true
+			currIndexingRequests[userId] = IndexingRequestStatus{DoneIndexing: true, IndexingErr: errors.New(payload["message"].(string))}
+			log.Println(currIndexingRequests)
+			//indexingJobCompletionQueue.UnregisterCallback(failureCallbackId)
 		}
 	})
-
-	//blocks until indexingComplete recieves true from the callback function
-	<-indexingComplete
-
-	indexingJobCompletionQueue.UnregisterCallback(successCallbackId)
-	indexingJobCompletionQueue.UnregisterCallback(failureCallbackId)
-
-	return indexingErr
 }
 
 type IsIndexedResponse struct {
@@ -137,15 +132,22 @@ func handleIsIndexedRequest(rw http.ResponseWriter, req *http.Request) {
 	volunteer, volunteerSearchErr := graph.FindVolunteer(vars["volunteerId"])
 	resEncoder := json.NewEncoder(rw)
 
+	currIndexRequest, indexRequestExists := currIndexingRequests[volunteer.FbId]
+
 	if volunteerSearchErr != nil {
 		rw.WriteHeader(400)
 		log.Println(volunteerSearchErr)
 		return
-	} else if volunteer != nil && volunteer.IsIndexed {
-		resEncoder.Encode(IsIndexedResponse{IsIndexed: true})
-		return
-	}
+	} else if indexRequestExists {
+		if currIndexRequest.IndexingErr != nil {
+			rw.WriteHeader(400)
+			log.Println(currIndexRequest.IndexingErr)
+		} else {
+			resEncoder.Encode(IsIndexedResponse{IsIndexed: currIndexRequest.DoneIndexing})
+		}
 
-	resEncoder.Encode(IsIndexedResponse{IsIndexed: false})
-	return
+		delete(currIndexingRequests, volunteer.FbId)
+	} else {
+		rw.WriteHeader(400)
+	}
 }
