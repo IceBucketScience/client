@@ -218,15 +218,16 @@ function attemptFbLogin() {
 }
 
 function initIndexing(sessionInfo) {
-    return new Promise(function(resolve, reject) {
+    return request.post("/index/").send(sessionInfo).endAsync()
+    .then(function() {
         var interval = setInterval(function() {
-            request.post("/index").send(sessionInfo).endAsync()
+            request.get("/indexed/" + sessionInfo.userId).endAsync()
             .then(function(res) {
                 if (res.isIndexed) {
-                    resolve();
+                    return;
                 }
             }, function(err) {
-                reject(err);
+                
             });
         }, 10 * 1000); 
     });
