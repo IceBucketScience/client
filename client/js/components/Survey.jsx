@@ -93,7 +93,7 @@ module.exports = React.createClass({
                         name="DidDonate" 
                         isYes={this.state.didDonate}
                         onChange={this.handleDidDonateChange}>
-                        <label> b) Did you donate to the <a href="http://www.alsa.org/" target="_blank">ALS Association</a> between May 15th and October 1st (inclusive)?</label>
+                        <label> b) Did you donate to the <a href="http://www.alsa.org/" target="_blank">ALS Association</a> (ALSA) between May 15th and October 1st (inclusive)?</label>
                     </YesOrNoQuestion>
 
                     {isFirstDonationQuestion}
