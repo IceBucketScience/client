@@ -1,7 +1,6 @@
 ### Front-end Specific Ignores ###
 
 **/node_modules
-**/build
 
 ### Go-Specific Ignores ###
 
