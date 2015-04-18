@@ -1,1 +1,1 @@
-web: client
+web: go run main.go
