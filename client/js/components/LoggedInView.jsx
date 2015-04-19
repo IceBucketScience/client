@@ -36,7 +36,7 @@ module.exports = React.createClass({
                 <div className="progress">
                     <div className="progress-bar progress-bar-danger progress-bar-striped" style={{width: "100%"}}></div>
                 </div>
-                <p>whoops! There was an error while indexing. Please try again by refreshing the page.</p>
+                <p>whoops! There was an error while indexing. Please wait a few minutes and then try again by refreshing the page.</p>
             </div>;
         }
         

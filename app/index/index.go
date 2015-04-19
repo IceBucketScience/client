@@ -65,7 +65,16 @@ func handleIndexRequest(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if volunteer == nil || volunteer.IndexingErr != nil {
+	if volunteer == nil || volunteer.IndexingErr != "" {
+		if volunteer != nil {
+			removeErrErr := volunteer.RemoveErr()
+			if removeErrErr != nil {
+				rw.WriteHeader(400)
+				log.Println(removeErrErr)
+				return
+			}
+		}
+
 		longTermToken, _, exchangeErr := facebook.GetLongTermToken(indexRequest.AccessToken)
 		if exchangeErr != nil {
 			rw.WriteHeader(400)
@@ -81,35 +90,14 @@ func handleIndexRequest(rw http.ResponseWriter, req *http.Request) {
 		}
 
 		log.Println("[SENT INDEX_REQUEST]", indexRequest.UserId)
-
-		rw.WriteHeader(200)
 	} else if volunteer.IsIndexed {
 		json.NewEncoder(rw).Encode(IsIndexedResponse{IsIndexed: true})
 		return
 	}
 
-	// log.Println("[INDEX_REQUEST_SUCCESSFUL]", indexRequest.UserId)
 	//if the function reaches this point, then the crawler is in the process of indexing, but hasn't finished yet
 	rw.WriteHeader(200)
 }
-
-/*func listenForIndexingCompletion(userId string) {
-	indexingJobCompletionQueue.RegisterOnce("SUCCESS", func(payload map[string]interface{}) {
-		if payload["userId"] == userId {
-			currIndexingRequests[userId] = IndexingRequestStatus{DoneIndexing: true}
-			log.Println("SUCCESS", currIndexingRequests)
-			//indexingJobCompletionQueue.UnregisterCallback(successCallbackId)
-		}
-	})
-
-	indexingJobCompletionQueue.RegisterOnce("FAILURE", func(payload map[string]interface{}) {
-		if payload["userId"] == userId {
-			currIndexingRequests[userId] = IndexingRequestStatus{DoneIndexing: true, IndexingErr: errors.New(payload["message"].(string))}
-			log.Println("FAILURE", currIndexingRequests)
-			//indexingJobCompletionQueue.UnregisterCallback(failureCallbackId)
-		}
-	})
-}*/
 
 func handleIsIndexedRequest(rw http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
@@ -120,12 +108,16 @@ func handleIsIndexedRequest(rw http.ResponseWriter, req *http.Request) {
 	if volunteerSearchErr != nil {
 		rw.WriteHeader(400)
 		log.Println(volunteerSearchErr)
+		return
 	} else if volunteer != nil {
-		if volunteer.IndexingErr != nil {
+		if volunteer.IndexingErr != "" {
 			rw.WriteHeader(400)
-			log.Println(volunteer.IndexingErr)
+			log.Println("[INDEX_REQUEST_FAILURE]", volunteer.IndexingErr)
+			return
 		} else if volunteer.IsIndexed {
+			log.Println("[INDEX_REQUEST_SUCCESSFUL]", volunteer.Name)
 			resEncoder.Encode(IsIndexedResponse{IsIndexed: true})
+			return
 		}
 
 		//if the function reaches this point, then the volunteer exists, but is still in the process of being indexed

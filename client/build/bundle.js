@@ -220,7 +220,7 @@ function attemptFbLogin() {
 function initIndexing(sessionInfo) {
     return request.post("/index").send(sessionInfo).endAsync()
     .then(function(res) {
-        if (JSON.parse(res).isIndexed) {
+        if (res.text !== "" && JSON.parse(res.text).isIndexed) {
             return true;
         }
 
@@ -795,7 +795,7 @@ module.exports = React.createClass({displayName: "exports",
                 React.createElement("div", {className: "progress"}, 
                     React.createElement("div", {className: "progress-bar progress-bar-danger progress-bar-striped", style: {width: "100%"}})
                 ), 
-                React.createElement("p", null, "whoops! There was an error while indexing. Please try again by refreshing the page.")
+                React.createElement("p", null, "whoops! There was an error while indexing. Please wait a few minutes and then try again by refreshing the page.")
             );
         }
         

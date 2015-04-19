@@ -29,7 +29,7 @@ function attemptFbLogin() {
 function initIndexing(sessionInfo) {
     return request.post("/index").send(sessionInfo).endAsync()
     .then(function(res) {
-        if (JSON.parse(res).isIndexed) {
+        if (res.text !== "" && JSON.parse(res.text).isIndexed) {
             return true;
         }
 
