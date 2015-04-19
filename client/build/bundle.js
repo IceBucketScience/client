@@ -219,7 +219,11 @@ function attemptFbLogin() {
 
 function initIndexing(sessionInfo) {
     return request.post("/index").send(sessionInfo).endAsync()
-    .then(function() {
+    .then(function(res) {
+        if (JSON.parse(res).isIndexed) {
+            return true;
+        }
+
         return new Promise(function(resolve, reject) {
             var interval = setInterval(function() {
                 request.get("/indexed/" + sessionInfo.userId).endAsync()
