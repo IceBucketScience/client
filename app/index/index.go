@@ -2,7 +2,7 @@ package index
 
 import (
 	"encoding/json"
-	"errors"
+	//"errors"
 	"log"
 	"net/http"
 
@@ -15,29 +15,21 @@ import (
 )
 
 var indexingJobQueue *msgQueue.DispatcherQueue
-var indexingJobCompletionQueue *msgQueue.RecieverQueue
 
-type IndexingRequestStatus struct {
-	DoneIndexing bool
-	IndexingErr  error
-}
-
-var currIndexingRequests map[string]IndexingRequestStatus
+//var indexingJobCompletionQueue *msgQueue.RecieverQueue
 
 func InitIndexRequestHandler(server *mux.Router, config *configVars.Configuration) error {
 	indexingJobQueueObj, indexingJobQueueCreationErr := msgQueue.CreateDispatcherQueue("indexing_job_queue")
-	indexingJobCompletionQueueObj, indexingJobCompletionQueueCreationErr := msgQueue.CreateRecieverQueue("indexing_job_completion_queue", config.BaseUrl, server)
-
-	currIndexingRequests = map[string]IndexingRequestStatus{}
+	//indexingJobCompletionQueueObj, indexingJobCompletionQueueCreationErr := msgQueue.CreateRecieverQueue("indexing_job_completion_queue", config.BaseUrl, server)
 
 	if indexingJobQueueCreationErr != nil {
 		return indexingJobQueueCreationErr
-	} else if indexingJobCompletionQueueCreationErr != nil {
+	} /*else if indexingJobCompletionQueueCreationErr != nil {
 		return indexingJobCompletionQueueCreationErr
-	}
+	}*/
 
 	indexingJobQueue = indexingJobQueueObj
-	indexingJobCompletionQueue = indexingJobCompletionQueueObj
+	//indexingJobCompletionQueue = indexingJobCompletionQueueObj
 
 	server.HandleFunc("/index", handleIndexRequest).Methods("POST")
 	server.HandleFunc("/indexed/{volunteerId}", handleIsIndexedRequest).Methods("GET")
@@ -73,28 +65,22 @@ func handleIndexRequest(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if volunteer == nil || !volunteer.IsIndexed {
-		currIndexingRequests[indexRequest.UserId] = IndexingRequestStatus{DoneIndexing: false}
-
-		if volunteer == nil {
-			longTermToken, _, exchangeErr := facebook.GetLongTermToken(indexRequest.AccessToken)
-			if exchangeErr != nil {
-				rw.WriteHeader(400)
-				log.Println(exchangeErr)
-				return
-			}
-
-			pushErr := indexingJobQueue.PushMessage("INDEX_REQUEST", IndexRequest{UserId: indexRequest.UserId, AccessToken: longTermToken})
-			if pushErr != nil {
-				rw.WriteHeader(400)
-				log.Println(pushErr)
-				return
-			}
-
-			log.Println("[SENT INDEX_REQUEST]", indexRequest.UserId)
+	if volunteer == nil || volunteer.IndexingErr != nil {
+		longTermToken, _, exchangeErr := facebook.GetLongTermToken(indexRequest.AccessToken)
+		if exchangeErr != nil {
+			rw.WriteHeader(400)
+			log.Println(exchangeErr)
+			return
 		}
 
-		listenForIndexingCompletion(indexRequest.UserId)
+		pushErr := indexingJobQueue.PushMessage("INDEX_REQUEST", IndexRequest{UserId: indexRequest.UserId, AccessToken: longTermToken})
+		if pushErr != nil {
+			rw.WriteHeader(400)
+			log.Println(pushErr)
+			return
+		}
+
+		log.Println("[SENT INDEX_REQUEST]", indexRequest.UserId)
 
 		rw.WriteHeader(200)
 	} else if volunteer.IsIndexed {
@@ -102,14 +88,12 @@ func handleIndexRequest(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	log.Println("END", currIndexingRequests)
-
 	// log.Println("[INDEX_REQUEST_SUCCESSFUL]", indexRequest.UserId)
-
+	//if the function reaches this point, then the crawler is in the process of indexing, but hasn't finished yet
 	rw.WriteHeader(200)
 }
 
-func listenForIndexingCompletion(userId string) {
+/*func listenForIndexingCompletion(userId string) {
 	indexingJobCompletionQueue.RegisterOnce("SUCCESS", func(payload map[string]interface{}) {
 		if payload["userId"] == userId {
 			currIndexingRequests[userId] = IndexingRequestStatus{DoneIndexing: true}
@@ -125,34 +109,30 @@ func listenForIndexingCompletion(userId string) {
 			//indexingJobCompletionQueue.UnregisterCallback(failureCallbackId)
 		}
 	})
-}
+}*/
 
 func handleIsIndexedRequest(rw http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 
 	volunteer, volunteerSearchErr := graph.FindVolunteer(vars["volunteerId"])
 	resEncoder := json.NewEncoder(rw)
-	log.Println("IS_INDEXED_START", currIndexingRequests)
 
 	if volunteerSearchErr != nil {
 		rw.WriteHeader(400)
 		log.Println(volunteerSearchErr)
 	} else if volunteer != nil {
-		currIndexRequest, indexRequestExists := currIndexingRequests[volunteer.FbId]
-		log.Println("CURR_INDEX_REQ", indexRequestExists, currIndexRequest)
-		if indexRequestExists {
-			if currIndexRequest.IndexingErr != nil {
-				rw.WriteHeader(400)
-				log.Println(currIndexRequest.IndexingErr)
-				delete(currIndexingRequests, volunteer.FbId)
-			} else if currIndexRequest.DoneIndexing {
-				resEncoder.Encode(IsIndexedResponse{IsIndexed: true})
-				delete(currIndexingRequests, volunteer.FbId)
-			} else {
-				resEncoder.Encode(IsIndexedResponse{IsIndexed: false})
-			}
+		if volunteer.IndexingErr != nil {
+			rw.WriteHeader(400)
+			log.Println(volunteer.IndexingErr)
+		} else if volunteer.IsIndexed {
+			resEncoder.Encode(IsIndexedResponse{IsIndexed: true})
 		}
-	} else {
+
+		//if the function reaches this point, then the volunteer exists, but is still in the process of being indexed
 		resEncoder.Encode(IsIndexedResponse{IsIndexed: false})
+		return
 	}
+
+	//if the function reaches this point, then no volunteer was found
+	rw.WriteHeader(404)
 }
