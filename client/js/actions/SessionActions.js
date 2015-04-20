@@ -43,6 +43,7 @@ function initIndexing(sessionInfo) {
                         resolve();
                     }
                 }, function(err) {
+                    console.log(err);
                     reject(err);
                 });
             }, 10 * 1000);
