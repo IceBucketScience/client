@@ -234,6 +234,7 @@ function initIndexing(sessionInfo) {
                         resolve();
                     }
                 }, function(err) {
+                    clearInterval(interval);
                     reject(err);
                 });
             }, 10 * 1000);
@@ -275,12 +276,11 @@ module.exports = {
             } else {
                 self.dispatch(constants.INDEXING_FB_SUCCESS);
             }
-        }, function() {
-            self.dispatch(constants.INDEXING_FB_FAILURE);
-        })
-        .then(function() {
+
             self.dispatch(constants.LOADING_ICE_BUCKET_MAP);
             return loadGraph(sessionInfo.userId, sessionInfo.accessToken)
+        }, function() {
+            self.dispatch(constants.INDEXING_FB_FAILURE);
         })
         .then(function(graph) {
             self.dispatch(constants.LOADING_ICE_BUCKET_MAP_SUCCESS, graph);
