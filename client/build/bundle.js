@@ -279,13 +279,13 @@ module.exports = {
 
             self.dispatch(constants.LOADING_ICE_BUCKET_MAP);
             return loadGraph(sessionInfo.userId, sessionInfo.accessToken)
+            .then(function(graph) {
+                self.dispatch(constants.LOADING_ICE_BUCKET_MAP_SUCCESS, graph);
+            }, function(err) {
+                self.dispatch(constants.LOADING_ICE_BUCKET_MAP_FAILURE);
+            });
         }, function() {
             self.dispatch(constants.INDEXING_FB_FAILURE);
-        })
-        .then(function(graph) {
-            self.dispatch(constants.LOADING_ICE_BUCKET_MAP_SUCCESS, graph);
-        }, function(err) {
-            self.dispatch(constants.LOADING_ICE_BUCKET_MAP_FAILURE);
         });
     },
     handleAuthStateChange: function(response) {
