@@ -21,7 +21,7 @@ func main() {
 	config.GetConfigVars(&configuration)
 
 	facebook.InitFbClient(configuration.FbAppId, configuration.FbAppSecret)
-	graph.InitGraph(configuration.DbUrl)
+	graph.InitGraph(configuration.DbUrl, configuration.MaxConcurrentDbRequests)
 
 	server := mux.NewRouter()
 
