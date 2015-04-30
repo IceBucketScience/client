@@ -67,6 +67,7 @@ func (t *Transaction) Commit() error {
 func CommitTransaction(qs []*neoism.CypherQuery) error {
 	tx, txErr := db.Begin(qs)
 	if txErr != nil {
+		log.Println("tx err", txErr)
 		return txErr
 	}
 
