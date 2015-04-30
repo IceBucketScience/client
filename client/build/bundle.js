@@ -1134,7 +1134,8 @@ module.exports = Fluxxor.createStore({
         });
 
         self.edges = graph.edges.filter(function(edge) {
-            var isValidEdge = self.nodesMap[edge.target] && self.nodesMap[edge.source];
+            var isValidEdge = self.nodesMap[edge.target] && self.nodesMap[edge.source] && !self.edgesMap[edge.id];
+            
             if (isValidEdge) {
                 self.edgesMap[edge.id] = edge;
             }
